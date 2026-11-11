@@ -1,0 +1,5 @@
+incident_id,description,downtime_minutes
+INC-001,Database connection failure,12
+INC-002,API deployment issue,8
+INC-003,Network timeout issue,5
+INC-004,Authentication service failure,10
