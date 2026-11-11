@@ -1,0 +1,18 @@
+# --- Python Virtual Environments ---
+venv/
+.venv/
+env/
+ENV/
+
+# --- Python Runtime & Bytecode ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Packaging / Distribution ---
+build/
+dist/
+*.egg-info/
+
+# --- Local Environment Variables ---
+.env
