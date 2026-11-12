@@ -185,15 +185,143 @@ The overall logic is:
 
 **Clear Visibility → Smarter Decisions → Reliable Systems**
 
-## Key Takeaways
+## 6. Connecting Observability with GitOps-Based Deployment
+
+Modern applications are often deployed across containers, Kubernetes clusters, and multiple environments.
+
+A successful deployment does not automatically mean that the application is healthy or performing as expected.
+
+SRE teams need both deployment configuration control and visibility into the actual behavior of deployed services.
+
+This is where GitOps and Observability work together.
+
+### 6.1 Why Observability Matters After Deployment
+
+Deployment is only the beginning of service operation.
+
+After an application is deployed, teams need to verify that it is:
+
+- Healthy.
+- Reachable.
+- Performing as expected.
+- Providing a reliable user experience.
+
+A Kubernetes Pod may be in the `Running` state while users are still experiencing slow responses, failed requests, or broken application paths.
+
+Therefore, checking Kubernetes resource status alone is not sufficient to understand the application's actual health.
+
+Observability provides additional visibility through metrics, logs, and traces.
+
+It helps teams:
+
+| Capability | Purpose |
+|---|---|
+| Verify Service Health | Confirm that the application responds correctly after deployment. |
+| Detect Failures Early | Identify problems before they become major incidents. |
+| Understand User Impact | Determine whether errors or latency affect users. |
+| Faster Troubleshooting | Use logs and traces to narrow down where problems occur. |
+
+### 6.2 What Is GitOps?
+
+GitOps is an approach to managing application deployment and infrastructure configuration where Git acts as the **Source of Truth**.
+
+Instead of manually changing the Kubernetes cluster, teams update configuration files and Kubernetes manifests stored in a Git repository.
+
+A GitOps tool such as Argo CD compares two states:
+
+- **Desired State:** The configuration defined in Git.
+- **Live State:** The actual configuration running in the Kubernetes cluster.
+
+When differences are detected, the GitOps tool can identify the drift and help synchronize the cluster with the desired configuration.
+
+### GitOps Benefits
+
+| Benefit | Description |
+|---|---|
+| Consistency | Configuration changes follow a controlled and repeatable process. |
+| Traceability | Changes can be reviewed and tracked through Git history. |
+| Recovery | Previous configurations can be restored through Git-based rollback workflows. |
+
+GitOps reduces the risk of undocumented or unapproved manual changes to the cluster.
+
+### 6.3 How Observability and GitOps Work Together
+
+GitOps and Observability solve different but connected problems.
+
+| GitOps | Observability |
+|---|---|
+| Is the cluster running the configuration defined in Git? | Is the application actually healthy and working well for users? |
+| Manages desired and live configuration states. | Provides visibility into application behavior. |
+| Detects configuration differences. | Detects performance problems and failures. |
+| Supports synchronization and configuration recovery. | Supports investigation and troubleshooting. |
+
+An application can be successfully synchronized by Argo CD without necessarily meeting its reliability expectations.
+
+For example, Argo CD may report that an application is synced, but users may still experience a high error rate or increased latency.
+
+Observability helps identify these problems after deployment.
+
+### 6.4 Example: A GitOps-Based Deployment Workflow
+
+Consider a team deploying a new version of an application to Kubernetes.
+
+1. The team updates the application manifests in Git.
+2. Argo CD detects the configuration change.
+3. Argo CD synchronizes the desired configuration with the Kubernetes cluster.
+4. The new application version is deployed.
+5. The team checks Kubernetes resource health.
+6. SRE engineers review request rate, latency, error rate, and application logs.
+7. If the new version causes errors, the team can use GitOps to roll back to a stable configuration.
+8. Observability data helps engineers investigate what went wrong.
+
+### Deployment and Observability Workflow
+
+```mermaid
+flowchart TD
+    A[Update Application Manifests in Git] --> B[Argo CD Detects Changes]
+    B --> C[Sync Desired State]
+    C --> D[Kubernetes Cluster]
+    D --> E[Deploy New Application Version]
+    E --> F[Verify Kubernetes Resource Health]
+    F --> G[Review Metrics and Logs]
+    G --> H{Application Healthy?}
+
+    H -->|Yes| I[Continue Operation]
+    H -->|No| J[Investigate Using Observability Data]
+    J --> K[Rollback to Stable Configuration]
+    K --> L[Verify Recovery]
+```
+
+This workflow connects configuration management, deployment verification, observability, and recovery.
+
+### 6.5 Applying This in Real SRE Workflows
+
+Deployment and monitoring should not be treated as separate activities.
+
+A reliable deployment workflow should include:
+
+- Updating application manifests in Git.
+- Synchronizing changes through Argo CD.
+- Checking application health.
+- Reviewing metrics and logs.
+- Taking corrective action when the service becomes degraded.
+
+A deployment should not be considered successful based only on the deployment process completing successfully.
+
+The application must also operate within acceptable health conditions.
+
+## 7. Key Takeaways
 
 - Observability provides visibility into internal system behavior.
 - It helps teams understand performance, failures, dependencies, and user impact.
-- Its main capabilities are early issue detection, root-cause investigation, and confident response.
 - Metrics, logs, traces, and alerts are complementary signals.
-- Observability supports better reliability decisions, improved performance, fewer failures, and dependable services.
-- The goal is not simply to collect more data, but to turn system signals into actionable understanding.
+- Observability supports early issue detection, root-cause investigation, and confident response.
+- GitOps uses Git as the source of truth for application configuration.
+- Argo CD compares desired configuration with the live Kubernetes state.
+- GitOps improves deployment consistency, traceability, and recovery.
+- GitOps confirms configuration synchronization, while Observability helps verify actual application behavior.
+- Combining both practices supports safer deployments, faster troubleshooting, and stronger operational confidence.
 
-## Source
+**Final Principle:**
 
-- Module 02 — Observability Fundamentals for Reliable Systems (Course Video)
+A successful deployment is not just an application running in Kubernetes. It is an application deployed with the expected configuration and operating reliably for its users.
