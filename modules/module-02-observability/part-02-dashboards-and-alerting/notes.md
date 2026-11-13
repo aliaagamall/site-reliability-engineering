@@ -136,7 +136,116 @@ To improve alert quality:
 
 ---
 
-## 3. Key Takeaways
+## 3. Turning Monitoring Data into Reliability
+
+Monitoring systems generate large amounts of data, but data alone does not improve reliability.
+
+SRE teams need dashboards and alerts that help them understand service health, detect problems early, and respond with the appropriate level of urgency.
+
+Dashboards, alerts, and SLO monitoring should support clear operational decisions rather than simply displaying metrics or sending notifications.
+
+### Why Dashboards Need a Clear Purpose
+
+Dashboards should be designed around specific operational questions instead of displaying every available metric.
+
+An effective SRE dashboard should help answer:
+
+- Is the service available?
+- Are users experiencing errors?
+- Is latency increasing?
+- Is the service meeting its SLO?
+- Is the error budget being consumed too quickly?
+
+Useful dashboard metrics include:
+
+- Request rate.
+- Latency.
+- Error rate.
+- Availability.
+- SLO compliance.
+
+These signals help engineers identify whether a service is healthy or degraded.
+
+### Connecting Alerts to User Impact
+
+Alerts should notify teams when action is needed, not whenever a metric changes.
+
+Excessively sensitive alerts create unnecessary notifications and eventually lead to alert fatigue.
+
+Strong alerts are connected to user impact.
+
+For example:
+
+- An alert based on a high error rate can indicate that users are experiencing failed requests.
+- An alert based on a high SLO burn rate can indicate that the service is consuming its error budget too quickly.
+- A temporary CPU increase does not necessarily mean users are experiencing a problem.
+
+Infrastructure alerts can still be useful, but their priority should reflect their impact on service reliability.
+
+Good alerts should explain:
+
+1. **What is wrong?**
+2. **Why does it matter?**
+3. **What should the responder check first?**
+
+They should also be routed to the correct responsible team.
+
+### Using SLO Monitoring for Better Decisions
+
+SLO monitoring moves beyond simple up-or-down monitoring.
+
+Instead of checking only whether a service is running, teams measure whether it meets an agreed reliability target.
+
+A service can be available but still violate its latency SLO if users receive very slow responses.
+
+SLO monitoring helps teams identify degraded user experiences and make better decisions about:
+
+- Release speed.
+- Incident response.
+- Reliability improvements.
+- Engineering priorities.
+
+When an SLO dashboard shows that the error budget is being consumed quickly, teams may:
+
+- Slow down deployments.
+- Investigate recurring incidents.
+- Prioritize stability improvements.
+
+This makes monitoring part of engineering decision-making, not just system observation.
+
+### Keeping Monitoring Practical
+
+Monitoring systems should be reviewed regularly because applications and user journeys change over time.
+
+To keep monitoring useful:
+
+- Remove unused dashboard panels.
+- Tune noisy alerts.
+- Update dashboards when application behavior changes.
+- Review whether existing metrics are still relevant.
+- Add new SLO views when important user journeys require them.
+- Document the purpose of important dashboards and alerts.
+
+A metric that was useful during early development may become less important in production, while new application behavior may require additional monitoring.
+
+### From Monitoring Data to Reliability Action
+
+The main roles of the monitoring components are complementary:
+
+| Component | Purpose |
+|---|---|
+| **Dashboards** | Provide visibility into service health and performance. |
+| **Alerts** | Notify teams when action is required. |
+| **SLO Monitoring** | Connect system behavior to reliability objectives. |
+| **Error Budgets** | Help guide release and reliability decisions. |
+
+The most effective monitoring setup is simple, user-focused, and actionable.
+
+By designing dashboards and alerts around real operational decisions, SRE teams can reduce noise, respond faster, and manage reliability with greater confidence.
+
+---
+
+## 4. Key Takeaways
 
 - Effective dashboards provide fast insight and support operational decisions.
 - The Four Golden Signals are Latency, Traffic, Errors, and Saturation.
@@ -145,3 +254,6 @@ To improve alert quality:
 - Symptom-based alerting focuses on user impact.
 - Correct alert routing helps the responsible team respond faster.
 - Reducing alert noise improves engineers' trust in the alerting system.
+- Monitoring data becomes valuable when it leads to practical reliability actions.
+- SLO monitoring helps teams make informed decisions about deployments and reliability improvements.
+- Dashboards, alerts, and error budgets should be reviewed regularly to remain useful as systems evolve.
