@@ -41,7 +41,7 @@ Exploring observability fundamentals, monitoring dashboards, alerting strategies
 |---|---|---|
 | 01 | Observability Fundamentals for Reliable Systems | Documented |
 | 02 | Dashboards, Alerts, and SLO Monitoring | Documented |
-| 03 | Incident Management and On-Call Practices | In Progress |
+| 03 | Incident Management and On-Call Practices | Documented  |
 
 ### Module 03 — Automation, SLO Tracking, GitOps Recovery, and AI for SRE
 
