@@ -30,20 +30,18 @@ Understanding SRE principles, reliability goals, and the relationship between so
 
 | Part | Topic | Status |
 |---|---|---|
-| 01 | Introduction to SRE and Reliability Thinking | In Progress |
-| 02 | Service Health Metrics and Reliability Targets | Not Started |
-| 03 | Module Wrap-Up and Assessment | Not Started |
+| 01 | Introduction to SRE and Reliability Thinking | Documented |
+| 02 | Service Health Metrics and Reliability Targets | Documented |
 
-### Module 02 — Monitoring, Alerting, and Incident Operations
+### Module 02 — Observability
 
-Exploring observability, monitoring dashboards, alerting strategies, and incident response workflows.
+Exploring observability fundamentals, monitoring dashboards, alerting strategies, and incident response workflows.
 
 | Part | Topic | Status |
 |---|---|---|
-| 01 | Observability and GitOps-Based Application Deployment | Not Started |
-| 02 | Dashboards, Alerts, and SLO Monitoring | Not Started |
-| 03 | Incident Management and On-Call Practices | Not Started |
-| 04 | Module Wrap-Up and Assessment | Not Started |
+| 01 | Observability Fundamentals for Reliable Systems | Documented |
+| 02 | Dashboards, Alerts, and SLO Monitoring | Documented |
+| 03 | Incident Management and On-Call Practices | In Progress |
 
 ### Module 03 — Automation, SLO Tracking, GitOps Recovery, and AI for SRE
 
@@ -54,7 +52,6 @@ Applying automation and reliability engineering practices to reduce operational 
 | 01 | Toil Reduction and SRE Automation | Not Started |
 | 02 | SLO Tracking and Reliability Decisions | Not Started |
 | 03 | GitOps Recovery and AI-Enhanced SRE | Not Started |
-| 04 | Module Wrap-Up and Assessment | Not Started |
 
 ### Module 04 — Course Wrap-Up and Assessment
 
@@ -81,20 +78,33 @@ Tools are introduced progressively as they become relevant to each topic.
 ```text
 site-reliability-engineering/
 ├── README.md
-├── modules/
-│   ├── module-01-foundations-of-sre/
-│   ├── module-02-monitoring-alerting-and-incident-operations/
-│   └── module-03-automation-slo-tracking-and-gitops-recovery/
-├── resources/
-└── assets/
+├── module-01-foundations-of-sre/
+│   ├── part-01-introduction-to-sre-and-reliability-thinking/
+│   │   └── notes.md
+│   └── part-02-service-health-metrics-and-reliability-targets/
+│       ├── notes.md
+│       ├── sre-error-budget-lab/
+│       └── sre-sli-slo-lab/
+└── module-02-observability/
+    ├── part-01-observability-fundamentals-for-reliable-systems/
+    │   ├── notes.md
+    │   └── lab-01-sre-environment-setup.md
+    ├── part-02-dashboards-and-alerting/
+    │   ├── notes.md
+    │   ├── kubernetes-monitoring-stack-lab.md
+    │   └── lab-slo-dashboard-grafana/
+    └── part-03-incident-management-and-on-call-practices/
+        └── notes.md
 ```
 
-Each module contains individual parts. Depending on the lesson, a part may include:
+Each module is organized into individual parts. Each part contains the documentation and practical work relevant to its topics.
+
+Depending on the lesson, a part may include:
 
 - `notes.md` — Technical explanations, concepts, and key takeaways.
-- `labs/` — Hands-on exercises and practical implementations.
-- `diagrams/` — Architecture diagrams and technical workflows.
-- Supporting configuration files, screenshots, and results when applicable.
+- Lab directories — Hands-on exercises, application code, and configuration files.
+- Lab documentation — Setup instructions, implementation steps, and validation results.
+- Supporting assets — Screenshots, dashboards, and other practical evidence.
 
 Not every part requires a practical lab.
 
