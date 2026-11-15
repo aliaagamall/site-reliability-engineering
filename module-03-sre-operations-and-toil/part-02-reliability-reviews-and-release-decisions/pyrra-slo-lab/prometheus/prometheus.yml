@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+
+rule_files:
+  - /etc/prometheus/pyrra/*.yaml
+
+scrape_configs:
+  - job_name: slo-demo-app
+    static_configs:
+      - targets: ["slo-demo-app:8000"]
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

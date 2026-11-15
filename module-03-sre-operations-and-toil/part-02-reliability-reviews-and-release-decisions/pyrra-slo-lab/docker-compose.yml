@@ -1,0 +1,62 @@
+services:
+  slo-demo-app:
+    build: ./app
+    container_name: slo-demo-app
+    environment:
+      ERROR_RATE: "0.002"
+    ports:
+      - "8000:8000"
+
+  traffic:
+    build: ./app
+    container_name: slo-traffic
+    command: ["python", "traffic.py"]
+    environment:
+      TARGET: http://slo-demo-app:8000/orders
+      RPS: "10"
+    depends_on:
+      - slo-demo-app
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/pyrra
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+
+  pyrra-filesystem:
+    image: ghcr.io/pyrra-dev/pyrra:v0.9.0
+    container_name: pyrra-filesystem
+    user: root
+    command:
+      - filesystem
+      - --config-files=/etc/pyrra/*.yaml
+      - --prometheus-folder=/etc/prometheus/pyrra
+      - --prometheus-url=http://prometheus:9090
+    volumes:
+      - ./pyrra/slos:/etc/pyrra:ro
+      - ./prometheus/rules:/etc/prometheus/pyrra
+    depends_on:
+      - prometheus
+
+  pyrra-ui:
+    image: ghcr.io/pyrra-dev/pyrra:v0.9.0
+    container_name: pyrra-ui
+    command:
+      - api
+      - --prometheus-url=http://prometheus:9090
+      - --api-url=http://pyrra-filesystem:9444
+    ports:
+      - "9099:9099"
+    depends_on:
+      - pyrra-filesystem
+
+volumes:
+  prometheus-data:

@@ -1,0 +1,3 @@
+prometheus/rules/*
+!prometheus/rules/.gitkeep
+.DS_Store
