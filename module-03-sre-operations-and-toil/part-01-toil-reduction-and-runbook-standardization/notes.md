@@ -14,7 +14,7 @@ This part covers:
 - Automating repetitive tasks.
 - Standardizing runbooks.
 - Enabling self-service workflows.
-- Reducing unnecessary operational noise.
+- Introducing automation safely.
 
 ## 2. Understanding Toil in SRE
 
@@ -25,8 +25,6 @@ In SRE, **toil** is repetitive, manual, automatable operational work that requir
 Toil may be necessary at a particular moment, but when the same task repeatedly requires manual effort, it becomes a drain on the engineering team.
 
 ### Three Characteristics of Toil
-
-Toil has three important characteristics:
 
 | Characteristic | Description |
 |---|---|
@@ -46,6 +44,13 @@ When engineers spend too much time on manual operational work, they have less ti
 - Strengthen long-term reliability.
 
 The objective of toil reduction is to replace repetitive manual work with more efficient and reusable processes.
+
+### Benefits of Toil Reduction
+
+- **Save Engineering Time:** Repetitive tasks can be handled faster through automation.
+- **Reduce Human Error:** Standardized procedures reduce missed steps and inconsistent actions.
+- **Improve Response Speed:** Automated checks and recovery actions can reduce incident response time.
+- **Support Reliability Improvement:** Engineers can focus more on preventing incidents instead of repeatedly fixing the same problems.
 
 ## 3. Common Examples of Toil
 
@@ -144,6 +149,8 @@ Examples:
 - Checking logs.
 - Updating configurations.
 - Resolving similar tickets.
+- Collecting service logs.
+- Checking disk usage.
 
 ### Step 2: Automate Safe and Predictable Steps
 
@@ -159,6 +166,7 @@ Automation can be implemented through:
 - CI/CD jobs.
 - Scheduled workflows.
 - Platform tools.
+- Configuration management tools such as Ansible.
 
 ### Benefits of Automation
 
@@ -182,7 +190,7 @@ This leads to the importance of runbook standardization.
 
 ### What Is a Runbook?
 
-A runbook is operational documentation that describes how to respond to a specific operational situation or incident.
+A **runbook** is operational documentation that describes how to respond to a specific operational situation or incident.
 
 Runbooks make response procedures clear and consistent, helping teams avoid confusion and unnecessary repeated investigation.
 
@@ -257,7 +265,132 @@ Reducing toil through these strategies leads to:
 - Better operational consistency.
 - More focus on system reliability.
 
-## 8. Key Takeaways
+## 8. Choosing What to Automate
+
+Not every operational task should be automated immediately.
+
+A task is a strong automation candidate when it:
+
+- Happens frequently.
+- Follows a clear and repeatable pattern.
+- Is well documented.
+- Can be executed safely.
+- Has predictable results.
+- Can be verified after execution.
+
+### Good Automation Candidates
+
+Examples include:
+
+- Collecting service logs.
+- Checking disk usage.
+- Checking service status.
+- Restarting a known failed service.
+- Validating configuration files.
+
+These tasks follow predictable procedures and can often be automated using scripts or tools such as Ansible.
+
+### Tasks That May Need Human Judgment
+
+Some tasks require human decisions, business approval, or complex investigation.
+
+These should remain manual or semi-automated until the process is better understood.
+
+### Questions to Ask Before Automating
+
+1. Is the task repeatable?
+2. Is the process clearly documented?
+3. Is it safe to execute automatically?
+4. Are the expected results predictable?
+5. Can the result be verified after execution?
+
+If these questions cannot be answered confidently, the team should improve the process before automating it.
+
+## 9. Introducing Automation Safely
+
+Automation should be tested carefully before it is trusted in production.
+
+The goal is not only to automate a task, but to ensure that the automation performs the expected actions without introducing additional problems.
+
+### 9.1 Test in a Safe Environment
+
+Start by running automation in a safe environment rather than immediately executing it in production.
+
+Review the output and confirm that it performs only the expected actions.
+
+### 9.2 Include Verification Steps
+
+Automation should verify the result of the action it performs.
+
+For example, restarting a service does not automatically mean the service has recovered successfully.
+
+After restarting the service, the automation should check:
+
+- Is the service running?
+- Is the service healthy?
+- Is it responding to requests?
+
+This prevents teams from assuming that a command completed the entire recovery process.
+
+### 9.3 Keep Automation Maintainable
+
+As automation grows, teams should ensure that playbooks are:
+
+- Readable.
+- Version-controlled.
+- Properly documented.
+- Easy for other engineers to understand and maintain.
+
+Version control also helps teams track changes to automation and review modifications over time.
+
+### 9.4 Automation Tools: Ansible
+
+Ansible is an automation and configuration management tool that allows teams to define operational tasks in reusable playbooks.
+
+An Ansible playbook can automate routine activities such as:
+
+- Checking service status.
+- Managing services.
+- Updating configurations.
+- Performing maintenance tasks.
+
+Instead of manually executing the same commands on systems, engineers can define the desired operations in a playbook and execute them consistently.
+
+## 10. Runbooks as the Foundation for Automation
+
+Runbooks are an important step before automation.
+
+A runbook captures the manual process clearly:
+
+- Symptoms.
+- Initial checks.
+- Commands.
+- Expected results.
+- Escalation steps.
+- Recovery actions.
+
+Once a runbook is stable and repeatedly used, parts of it can often be converted into scripts or automation playbooks.
+
+### Why Document Before Automating?
+
+Automating an unclear process can reproduce the same confusion faster.
+
+A good runbook helps teams understand and standardize the procedure before converting it into automation.
+
+### From Manual Work to Automation
+
+A practical progression is:
+
+1. Identify a repetitive operational task.
+2. Perform and understand the manual procedure.
+3. Document the procedure in a runbook.
+4. Review and standardize the steps.
+5. Automate safe and predictable parts.
+6. Test the automation in a safe environment.
+7. Verify the results.
+8. Maintain the automation and documentation.
+
+## 11. Key Takeaways
 
 - Toil is repetitive, manual, automatable operational work that does not create long-term engineering value.
 - Toil reduces the time engineers can spend improving reliability.
@@ -267,11 +400,16 @@ Reducing toil through these strategies leads to:
 - Automation reduces manual effort, human errors, and operational inconsistency.
 - Runbooks should document triggers, owners, checks, recovery steps, rollback guidance, and escalation procedures.
 - Runbooks should be updated after incidents.
+- Not every task should be automated; tasks requiring judgment or approval may need to remain manual.
+- Automation candidates should be frequent, predictable, documented, safe, and verifiable.
+- Automation should be tested in a safe environment before production use.
+- Verification steps confirm that an automated action achieved the expected result.
+- Automation playbooks should be readable, version-controlled, and documented.
 - Self-service workflows reduce repeated manual support.
 - Better documentation and actionable alerts help reduce operational noise.
 - Regular toil reviews help teams identify what should be automated, documented, or simplified.
 
-## 9. Toil Reduction Strategy Summary
+## 12. Toil Reduction Strategy Summary
 
 | Strategy | What It Does | Expected Benefit |
 |---|---|---|
@@ -281,4 +419,7 @@ Reducing toil through these strategies leads to:
 | Self-Service | Enable teams to complete common tasks through reusable workflows. | Reduce repeated support requests. |
 | Documentation | Provide clear guidance for routine questions and tasks. | Reduce unnecessary tickets. |
 | Alert Improvement | Make alerts meaningful and actionable. | Reduce operational noise and interruptions. |
+| Safe Testing | Test automation in a safe environment before production use. | Reduce the risk of unintended actions. |
+| Verification | Check whether automated tasks achieved the expected result. | Confirm successful outcomes rather than command execution alone. |
+| Version Control | Track and manage changes to automation playbooks. | Improve maintainability and collaboration. |
 | Regular Toil Reviews | Decide what should be automated, documented, or simplified. | Continuously improve operational efficiency. |
