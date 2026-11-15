@@ -123,7 +123,7 @@ If the result is above 5, the fast burn condition is true.
 
 Wait about 5 minutes.
 
-![Slow burn firing](docs/screenshots/02-slow-burn-firing.png)
+![Slow burn firing](docs/screenshots/02-slow-burn-firing.PNG)
 
 *Figure 2. Error rate of 3% gives a burn rate near 3. It stays under the fast threshold (5) but above the slow threshold (2), so only `ErrorBudgetSlowBurn` fires.*
 
@@ -131,7 +131,7 @@ Wait about 5 minutes.
 
 Wait about 3 minutes.
 
-![Fast burn firing](docs/screenshots/03-fast-burn-firing.png)
+![Fast burn firing](docs/screenshots/03-fast-burn-firing.PNG)
 
 *Figure 3. Error rate of 10% gives a burn rate near 10. Both thresholds are exceeded, so `ErrorBudgetFastBurn` and `ErrorBudgetSlowBurn` are firing.*
 
