@@ -6,12 +6,13 @@ Shipping software quickly is important, but shipping safely is essential.
 
 Reliability reviews help SRE and engineering teams make evidence-based release decisions while protecting production systems from unnecessary risks.
 
-This topic covers four main areas:
+This topic covers:
 
 - Reliability reviews and release decisions.
 - Deployment freezes and rollback decisions.
 - Reliability-focused sprints.
 - Production readiness checklists.
+- Using SLO data to guide reliability decisions.
 
 ## 2. Reliability Reviews
 
@@ -274,7 +275,111 @@ The guiding principle is:
 
 **Release only when the service can be operated confidently.**
 
-## 7. Key Takeaways
+## 7. Using SLO Data to Guide Reliability Decisions
+
+SLOs are not just technical measurements. They are decision-making tools that help engineering teams understand whether a service is reliable enough for its users.
+
+By regularly tracking SLOs and error budgets, teams can make informed decisions about releases, incident response, and reliability improvements.
+
+### 7.1 Why SLO Tracking Matters
+
+SLO tracking helps teams understand whether a service is meeting its reliability target over time.
+
+Without regular tracking, teams may only discover reliability problems after users complain or a major incident occurs.
+
+Regular SLO monitoring helps teams:
+
+- **Identify reliability risks early:** Detect when error budgets are being consumed too quickly.
+- **Support release planning:** Decide whether deployments should continue, slow down, or pause.
+- **Prioritize engineering work:** Focus on stability when reliability is at risk instead of continuing to prioritize new features.
+- **Create shared accountability:** Give development, operations, and SRE teams a common view of service reliability.
+
+SLO tracking moves teams from reactive problem-solving toward proactive reliability management.
+
+### 7.2 Turning Error Budgets into Policies
+
+An error budget becomes more useful when the team defines actions for different budget conditions.
+
+An error budget policy connects reliability performance to engineering decisions.
+
+For example:
+
+| Error Budget Condition | Possible Team Actions |
+|---|---|
+| Healthy budget | Continue normal release activities |
+| Budget at risk | Review recent deployments, investigate recurring incidents, and increase monitoring |
+| Nearly exhausted | Pause risky releases and prioritize reliability improvements |
+| Fully consumed | Stop non-critical changes until service reliability is restored |
+
+The exact thresholds and actions should be defined by the team's agreed policy.
+
+This approach makes release decisions more consistent because teams use shared reliability signals rather than relying only on opinions.
+
+### 7.3 Reliability Reviews in Practice
+
+Reliability reviews use service data to decide what actions should happen next.
+
+A review may examine:
+
+- SLO performance.
+- Error budget consumption.
+- Recent incidents.
+- Alert quality.
+- Deployment history.
+- Unresolved reliability risks.
+
+Based on the findings, the team may decide to:
+
+- Improve dashboards.
+- Tune noisy alerts.
+- Update runbooks.
+- Fix unstable services.
+- Delay a high-risk release.
+- Prioritize deeper architectural improvements.
+
+Regular reviews also help identify recurring patterns.
+
+For example, if the same service repeatedly consumes its error budget, temporary fixes may not be enough. The team may need to investigate deeper architectural problems.
+
+### 7.4 Using Burn Rate Alerts Carefully
+
+Burn rate measures how quickly a service is consuming its error budget relative to the allowed rate.
+
+Burn rate alerts help teams detect reliability problems before the entire error budget is consumed.
+
+Two general patterns are important:
+
+- **Fast burn:** Indicates that the error budget is being consumed rapidly. It may represent a serious issue requiring immediate investigation and response.
+- **Slow burn:** Indicates gradual reliability degradation. It may require investigation before the problem becomes critical.
+
+Burn rate alerts must be configured carefully:
+
+- Thresholds that are too sensitive can generate excessive alerts and cause alert fatigue.
+- Thresholds that are too loose may delay detection of reliability problems.
+- Alerts should be connected to meaningful service impact and clear response actions.
+
+The goal is to detect important reliability risks without overwhelming the on-call team.
+
+### 7.5 Connecting SLOs, Error Budgets, and Burn Rate
+
+These concepts work together:
+
+| Concept | Main Purpose | Question It Answers |
+|---|---|---|
+| SLO | Defines the reliability target | How reliable should the service be? |
+| Error Budget | Measures the allowed unreliability | How much reliability risk remains? |
+| Burn Rate | Measures the speed of budget consumption | How quickly are we consuming the remaining budget? |
+
+Together, they provide a practical foundation for reliability decisions.
+
+For example:
+
+1. The SLO defines the service's reliability target.
+2. The error budget shows how much unreliability is still allowed.
+3. Burn rate alerts reveal when that budget is being consumed too quickly.
+4. Reliability reviews use this information to guide release and engineering decisions.
+
+## 8. Key Takeaways
 
 - Reliability reviews provide an evidence-based foundation for release decisions.
 - Health signals, evidence checks, and risk reviews help determine whether a release is safe.
@@ -282,5 +387,9 @@ The guiding principle is:
 - Rollbacks help restore stability when a deployed release causes harm.
 - Reliability-focused sprints reduce operational debt through alert tuning, runbook improvements, and automation.
 - Production readiness ensures that services can be monitored, operated, and recovered confidently.
+- SLO tracking helps teams identify reliability risks and make proactive decisions.
+- Error budget policies connect reliability performance to release decisions and engineering priorities.
+- Burn rate alerts help detect rapid or gradual error budget consumption.
+- SLOs, error budgets, and burn rate data make reliability a shared engineering responsibility.
 
-**Final Principle:** Shipping safely requires more than working code. A production-ready service must have clear ownership, useful monitoring, actionable alerts, documented dependencies, reliable rollback procedures, and effective runbooks.
+**Final Principle:** Use reliability data to guide engineering decisions. Release when the service is healthy and operationally ready, and prioritize stability when reliability is at risk.
