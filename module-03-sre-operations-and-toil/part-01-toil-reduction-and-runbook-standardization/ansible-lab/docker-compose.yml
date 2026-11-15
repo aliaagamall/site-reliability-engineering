@@ -1,0 +1,9 @@
+services:
+  ansible:
+    build: .
+    container_name: ansible-sre-lab
+    hostname: sre-lab
+    working_dir: /lab
+    volumes:
+      - ./:/lab
+    command: sleep infinity
