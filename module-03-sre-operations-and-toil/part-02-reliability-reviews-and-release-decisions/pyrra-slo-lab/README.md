@@ -120,7 +120,7 @@ Wait about 10 minutes, then open the SLO details page.
 Wait about 10 to 15 minutes, then open the SLO details page.
 
 ![SLO violated](docs/screenshots/02-slo-violated.png)
-![Error Budget Consumption](docs/screenshots/03-error-budget-consumption)
+![Error Budget Consumption](docs/screenshots/03-error-budget-consumption.PNG)
 
 *Figure 2. Same SLO with a 5% error rate. Availability drops below the 99% target, the error budget is exhausted (negative remaining), and the burn rate is far above 1, so the SLO is violated.*
 
