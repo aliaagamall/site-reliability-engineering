@@ -1,0 +1,37 @@
+services:
+  slo-demo-app:
+    build: ./app
+    container_name: burn-demo-app
+    environment:
+      ERROR_RATE: "0.002"
+    ports:
+      - "8000:8000"
+
+  traffic:
+    build: ./app
+    container_name: burn-traffic
+    command: ["python", "traffic.py"]
+    environment:
+      TARGET: http://slo-demo-app:8000/orders
+      RPS: "10"
+    depends_on:
+      - slo-demo-app
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: burn-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - slo-demo-app
+
+volumes:
+  prometheus-data:
