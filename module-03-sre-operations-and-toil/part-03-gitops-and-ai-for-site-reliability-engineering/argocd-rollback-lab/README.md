@@ -1,183 +1,281 @@
-# Argo CD Rollback Lab
+# GitOps Rollback with Argo CD on Kubernetes
 
-A hands-on GitOps lab demonstrating application deployment, failure detection, and recovery through Git-based rollback using Argo CD and Kubernetes.
+Hands-on lab: deploy a stable application through Git with Argo CD, push a faulty version, observe the degraded state, and recover by reverting the Git commit.
 
-## Overview
+Part of: `module-03-sre-operations-and-toil / part-03-gitops-and-ai-for-site-reliability-engineering`
 
-This lab demonstrates how Argo CD continuously monitors the desired application state stored in Git and synchronizes it with a Kubernetes cluster.
+## Objectives
 
-The exercise covers three deployment scenarios:
+- Run Argo CD on a local Minikube cluster
+- Define an Argo CD Application declaratively (`argocd/application.yaml`)
+- Deploy through Git with manual sync
+- Simulate a bad release and observe the degraded state
+- Roll back with `git revert`, not by editing the cluster
 
-1. **Stable Release:** Deploy a valid NGINX image and verify that the application reaches a healthy state.
-2. **Faulty Release:** Introduce an invalid image tag and observe how Kubernetes and Argo CD report the deployment failure.
-3. **Git-Based Rollback:** Revert the faulty Git commit and allow Argo CD to restore the previous healthy application state.
+## Architecture
 
-## Architecture and Workflow
+```mermaid
+flowchart LR
+    eng["Engineer<br/>break.sh / rollback.sh"]
 
-The following sequence diagram illustrates the complete deployment and recovery lifecycle.
+    subgraph gh["GitHub: aliaagamall/site-reliability-engineering"]
+        repo[("main branch<br/>gitops-repo/manifests/<br/>deployment.yaml + service.yaml")]
+    end
+
+    subgraph k8s["Minikube cluster"]
+        subgraph nsargo["namespace: argocd"]
+            argo["Argo CD<br/>Application: rollback-demo<br/>sync policy: manual"]
+        end
+        subgraph nsdef["namespace: default"]
+            dep["Deployment<br/>rollback-demo (2 replicas)"]
+            pods["Pods<br/>nginx"]
+            svc["Service<br/>NodePort 30080"]
+        end
+    end
+
+    eng -- "git push / git revert" --> repo
+    eng -- "Refresh + Sync (UI)" --> argo
+    argo -- "compare desired state" --> repo
+    argo -- "apply manifests" --> dep
+    dep --> pods
+    svc --> pods
+
+    classDef git fill:#e8f0fe,stroke:#4285f4,color:#000
+    classDef ctl fill:#fff3e0,stroke:#fb8c00,color:#000
+    classDef wl fill:#e6f4ea,stroke:#34a853,color:#000
+    class repo git
+    class argo ctl
+    class dep,pods,svc wl
+```
+
+Source of truth is Git. The cluster is never edited by hand.
+
+## Structure
+
+```text
+argocd-rollback-lab/
+├── argocd/application.yaml        # Argo CD Application
+├── gitops-repo/manifests/         # path tracked by Argo CD
+│   ├── deployment.yaml            # nginx:1.27, 2 replicas
+│   └── service.yaml               # NodePort 30080
+├── scripts/
+│   ├── install-argocd.sh          # Minikube + Argo CD + admin password
+│   ├── status.sh                  # app, deployment, pods, image
+│   ├── break.sh                   # push faulty image to Git
+│   ├── rollback.sh                # git revert + push
+│   └── cleanup.sh
+└── docs/screenshots/
+```
+
+The lab lives inside the main SRE repo. Argo CD tracks only the `gitops-repo/manifests` path, so unrelated commits elsewhere in the repo do not affect the application.
+
+## Application definition
+
+| Field | Value | Why |
+|---|---|---|
+| `metadata.name` | `rollback-demo` | Application name |
+| `spec.project` | `default` | Default Argo CD project |
+| `source.repoURL` | `https://github.com/aliaagamall/site-reliability-engineering.git` | Source of truth |
+| `source.targetRevision` | `main` | Branch to track |
+| `source.path` | `module-03-sre-operations-and-toil/part-03-gitops-and-ai-for-site-reliability-engineering/argocd-rollback-lab/gitops-repo/manifests` | Folder with Kubernetes manifests |
+| `destination.server` | `https://kubernetes.default.svc` | The cluster Argo CD runs in |
+| `destination.namespace` | `default` | Target namespace |
+| `syncPolicy` | not set | Manual sync, each version is applied on purpose |
+
+## Prerequisites
+
+| Tool | Check |
+|---|---|
+| Docker | `docker --version` |
+| Minikube | `minikube version` |
+| kubectl | `kubectl version --client` |
+| git + GitHub account | `git --version` |
+
+- Minikube needs about 2 CPUs and 4 GB RAM.
+- The GitHub repo must be public, otherwise Argo CD needs repository credentials.
+- On WSL with the repo under `/mnt/<drive>`, remove CRLF from the scripts: `sed -i 's/\r$//' scripts/*.sh`.
+
+## Setup
+
+```bash
+cd module-03-sre-operations-and-toil/part-03-gitops-and-ai-for-site-reliability-engineering/argocd-rollback-lab
+./scripts/install-argocd.sh
+```
+
+![Argo CD pods](docs/screenshots/01-argocd-pods-running.png)
+
+*Figure 1. All Argo CD pods in namespace `argocd` are Running.*
+
+Open the UI (separate terminal):
+
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Login at `https://localhost:8080` with user `admin` and the initial password from the install script.
+
+Argo CD pulls from GitHub, so push the lab files first:
+
+```bash
+export GITOPS_REPO_DIR=$(git rev-parse --show-toplevel)
+git add .
+git commit -m "feat(gitops-lab): add Argo CD GitOps rollback lab on Minikube"
+git push origin main
+```
+
+Create the Application:
+
+```bash
+kubectl apply -f argocd/application.yaml
+kubectl get app -n argocd
+```
+
+![Application out of sync](docs/screenshots/02-app-outofsync.png)
+
+*Figure 2. Right after creation the application is OutOfSync because nothing has been synced yet.*
+
+## Lab steps
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Eng as Engineer
-    participant Git as GitHub (main)
+    participant Git as GitHub
     participant Argo as Argo CD
     participant K8s as Kubernetes
 
-    rect rgb(232, 243, 236)
-        Note over Eng,K8s: Stable Release
-        Eng->>Git: Push nginx:1.27
+    rect rgb(200, 235, 215)
+        Note over Eng,K8s: 1. Stable Release
+        Eng->>Git: push nginx:1.27
         Eng->>Argo: Refresh + Sync
-        Argo->>Git: Fetch manifests
-        Argo->>K8s: Apply manifests
+        Argo->>Git: fetch manifests
+        Argo->>K8s: apply
         K8s-->>Argo: 2/2 Ready
-        Argo-->>Eng: Synced, Healthy
+        Argo-->>Eng: Synced + Healthy
     end
 
-    rect rgb(249, 235, 234)
-        Note over Eng,K8s: Faulty Release
-        Eng->>Git: break.sh (push invalid image tag)
+    rect rgb(255, 220, 220)
+        Note over Eng,K8s: 2. Faulty Release
+        Eng->>Git: break.sh (nginx:does-not-exist-99)
         Eng->>Argo: Refresh + Sync
-        Argo->>Git: Fetch manifests
-        Argo->>K8s: Apply manifests
+        Argo->>Git: fetch manifests
+        Argo->>K8s: apply
         K8s-->>Argo: ImagePullBackOff
-        Argo-->>Eng: Synced, Degraded (after 60s)
+        Argo-->>Eng: Synced + Degraded
     end
 
-    rect rgb(233, 240, 249)
-        Note over Eng,K8s: Git-Based Rollback
+    rect rgb(210, 230, 255)
+        Note over Eng,K8s: 3. Rollback via Git
         Eng->>Git: rollback.sh (git revert + push)
         Eng->>Argo: Refresh + Sync
-        Argo->>Git: Fetch manifests
-        Argo->>K8s: Apply nginx:1.27
+        Argo->>Git: fetch manifests
+        Argo->>K8s: apply nginx:1.27
         K8s-->>Argo: 2/2 Ready
-        Argo-->>Eng: Synced, Healthy
+        Argo-->>Eng: Synced + Healthy
     end
 ```
 
-## Lab Objectives
+| # | Step | Action |
+|---|---|---|
+| 1 | Sync stable version | UI: Sync > Synchronize |
+| 2 | Verify | `./scripts/status.sh` |
+| 3 | Push faulty version | `./scripts/break.sh` |
+| 4 | Refresh + sync in UI | Argo CD applies the bad state |
+| 5 | Observe failure | `./scripts/status.sh` |
+| 6 | Roll back in Git | `./scripts/rollback.sh` |
+| 7 | Refresh + sync in UI | Argo CD applies the restored state |
+| 8 | Verify recovery | `./scripts/status.sh` |
 
-- Understand GitOps deployment workflows.
-- Configure an Argo CD application to track Git manifests.
-- Synchronize Kubernetes resources through Argo CD.
-- Observe OutOfSync, Synced, Healthy, and Degraded states.
-- Simulate an image-pull failure.
-- Understand Kubernetes `ImagePullBackOff`.
-- Perform Git-based rollback using `git revert`.
-- Verify application recovery and synchronization.
+Do not create any other commit between `break.sh` and `rollback.sh`. The rollback script aborts unless the latest commit is the faulty one.
 
-## Repository Structure
+### Stable version
 
-```text
-argocd-rollback-lab/
-├── README.md
-├── argocd/
-│   └── application.yaml
-├── docs/
-│   └── screenshots/
-│       ├── 01-argocd-pods-running.png
-│       ├── 02-app-outofsync.png
-│       ├── 03-stable-healthy-synced.png
-│       ├── 04-stable-pods.png
-│       ├── 05-faulty-degraded.png
-│       ├── 06-faulty-pods.png
-│       ├── 07-rollback.png
-│       └── 08-recovered-healthy.png
-├── gitops-repo/
-│   └── manifests/
-│       ├── deployment.yaml
-│       └── service.yaml
-└── scripts/
-    ├── break.sh
-    ├── cleanup.sh
-    ├── install-argocd.sh
-    ├── rollback.sh
-    └── status.sh
+![Stable synced and healthy](docs/screenshots/03-stable-healthy-synced.png)
+
+*Figure 3. After the first sync the application is Synced and Healthy.*
+
+![Stable pods](docs/screenshots/04-stable-pods.png)
+
+*Figure 4. Two `rollback-demo` pods are Running, the deployment shows 2/2 ready, and the image is `nginx:1.27`.*
+
+### Faulty version
+
+```bash
+./scripts/break.sh
 ```
 
-## Tools and Technologies
+Refresh and sync the application in the UI.
 
-- **Version Control:** Git, GitHub
-- **GitOps:** Argo CD
-- **Container Orchestration:** Kubernetes
-- **Container Image:** NGINX
-- **Configuration:** Kubernetes YAML manifests
-- **Automation:** Bash scripts
+![Degraded application](docs/screenshots/05-faulty-degraded.png)
 
-## Implementation Workflow
+*Figure 5. Argo CD reports the application as Degraded. It is still Synced, because the cluster matches Git, but the desired state in Git is unhealthy.*
 
-### 1. Environment Setup
+![Faulty pods](docs/screenshots/06-faulty-pods.png)
 
-Install Argo CD and prepare the Kubernetes environment.
+*Figure 6. The new pod cannot pull the invalid image and shows `ErrImagePull` then `ImagePullBackOff`.*
 
-Script: `scripts/install-argocd.sh`
+### Rollback
 
-### 2. Stable Deployment
+```bash
+./scripts/rollback.sh
+```
 
-Deploy the application using the valid `nginx:1.27` image.
+![Revert commit in Git history](docs/screenshots/07-rollback.png)
 
-Verify that:
+*Figure 7. Git history shows the revert commit on top of the faulty commit. The rollback is a new commit, the history is preserved.*
 
-- Argo CD reports the application as Synced and Healthy.
-- Both application pods reach the Ready state.
-- Kubernetes successfully runs the requested image.
+Refresh and sync the application in the UI.
 
-### 3. Fault Injection
+![Recovered application](docs/screenshots/08-recovered-healthy.png)
 
-Run `scripts/break.sh` to introduce an invalid NGINX image tag.
+*Figure 8. After syncing the revert commit the application is Synced and Healthy again, with 2/2 ready replicas on `nginx:1.27`.*
 
-Observe:
+Commit the screenshots only after the rollback is finished.
 
-- The application becomes OutOfSync before synchronization.
-- Argo CD applies the updated manifest.
-- Kubernetes reports `ImagePullBackOff`.
-- Argo CD transitions the application to Degraded after its health evaluation.
+## Expected results
 
-### 4. Git-Based Recovery
+| Stage | Git | Argo CD | Pods | Image |
+|---|---|---|---|---|
+| Stable | commit 1 | Synced, Healthy | 2/2 Running | `nginx:1.27` |
+| Faulty | commit 2 | Synced, Degraded | new pod `ImagePullBackOff` | `nginx:does-not-exist-99` |
+| Rolled back | commit 3 (revert) | Synced, Healthy | 2/2 Running | `nginx:1.27` |
 
-Run `scripts/rollback.sh` to revert the faulty Git commit and push the previous configuration.
+## Design notes
 
-After synchronization, verify that:
+- Manual sync keeps every version change visible and controlled.
+- `progressDeadlineSeconds: 60` makes Argo CD report Degraded after 1 minute instead of the default 10 minutes.
+- The default RollingUpdate keeps the old healthy pods serving while the new pod fails. You may see `READY 2/2` during the failure while Argo CD is already Degraded. Kubernetes protected availability, Argo CD still reports that the desired state is unhealthy.
+- After the revert, the pod template matches the original, so Kubernetes reuses the old ReplicaSet. Check with `kubectl rollout history deploy/rollback-demo`.
+- Rollback is a new commit (`git revert`), so history stays auditable: what changed, who changed it, and how it was restored.
+- The Argo CD UI has its own rollback button. It is intentionally not used, because it changes the cluster without changing Git.
+- `break.sh` and `rollback.sh` use `GITOPS_REPO_DIR` (the SRE repo root) and a full manifest path, because the lab is part of the main repo.
 
-- The deployment uses `nginx:1.27` again.
-- Both pods return to Ready.
-- Argo CD reports Synced and Healthy.
+## Troubleshooting
 
-### 5. Status Verification and Cleanup
-
-Use the following scripts:
-
-- `scripts/status.sh` — Inspect the current lab status.
-- `scripts/cleanup.sh` — Clean up the lab resources.
-
-## Practical Evidence
-
-The following screenshots document the actual execution and validation of the lab.
-
-| Stage | Evidence |
+| Symptom | Fix |
 |---|---|
-| Environment Setup | ![Argo CD Pods](docs/screenshots/01-argocd-pods-running.png) |
-| OutOfSync Detection | ![OutOfSync](docs/screenshots/02-app-outofsync.png) |
-| Stable Application | ![Stable Healthy Synced](docs/screenshots/03-stable-healthy-synced.png) |
-| Stable Kubernetes Pods | ![Stable Pods](docs/screenshots/04-stable-pods.png) |
-| Faulty Deployment | ![Faulty Degraded](docs/screenshots/05-faulty-degraded.png) |
-| Image Pull Failure | ![Faulty Pods](docs/screenshots/06-faulty-pods.png) |
-| Git-Based Rollback | ![Rollback](docs/screenshots/07-rollback.png) |
-| Successful Recovery | ![Recovered Healthy](docs/screenshots/08-recovered-healthy.png) |
+| `metadata.annotations: Too long` on install | Use `--server-side --force-conflicts` (already in the script) |
+| Argo CD pods Pending | Give Minikube more resources: `minikube start --cpus=2 --memory=4096` |
+| `authentication required: Repository not found` | Repo is private or `repoURL` is wrong. Make it public or add credentials, then check `kubectl get app rollback-demo -n argocd -o jsonpath='{.spec.source.repoURL}'` |
+| `path ... does not exist` | Push the lab files first and check `source.path` matches the folder on GitHub |
+| UI does not show the new commit | Hard refresh: `kubectl -n argocd annotate app rollback-demo argocd.argoproj.io/refresh=hard --overwrite` |
+| App stays Synced after `break.sh` | Check the push reached GitHub: `git log origin/main --oneline -3` |
+| `break.sh` fails with unset variable | `export GITOPS_REPO_DIR=$(git rev-parse --show-toplevel)` |
+| `rollback.sh` says latest commit is not the faulty one | Another commit was made after `break.sh`. Revert the faulty commit manually with `git revert <sha>` |
+| `bad interpreter ... ^M` | `sed -i 's/\r$//' scripts/*.sh` |
+| `localhost:8080` certificate warning | Expected with the self-signed certificate, continue |
+| Port 8080 already in use | Use another local port: `port-forward ... 8443:443` |
 
-## Key Takeaways
+## Cleanup
 
-- Git serves as the source of truth for the desired application state.
-- Argo CD continuously reconciles the actual Kubernetes state with the Git-defined state.
-- A successful synchronization does not necessarily mean an application is healthy.
-- Kubernetes can accept a deployment configuration even when its containers cannot start.
-- Argo CD health status helps identify application-level deployment problems.
-- Git-based rollback restores a previously committed desired state without manually editing the Kubernetes resources.
+```bash
+./scripts/cleanup.sh            # remove the app and the argocd namespace
+./scripts/cleanup.sh --cluster  # also delete the Minikube cluster
+```
 
-## Final Result
+## Extension ideas
 
-The lab demonstrates a complete GitOps recovery cycle:
-
-**Deploy → Detect Failure → Diagnose → Revert → Synchronize → Recover**
-
-This reinforces the role of GitOps in maintaining consistent, auditable, and recoverable application deployments.
+- Enable auto-sync with `selfHeal` and `prune`, and compare the behavior
+- Add a `Rollout` with Argo Rollouts for canary and automatic abort
+- Manage the Application itself with an app-of-apps pattern
+- Add a CI check that validates manifests (`kubectl apply --dry-run=server`) before merge
