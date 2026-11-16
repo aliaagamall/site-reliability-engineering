@@ -137,6 +137,25 @@ kubectl get app -n argocd
 ## Lab steps
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": "13px",
+    "primaryTextColor": "#263445",
+    "lineColor": "#64748b",
+    "actorBkg": "#f1f5f9",
+    "actorBorder": "#94a3b8",
+    "actorTextColor": "#263445",
+    "signalColor": "#475569",
+    "signalTextColor": "#334155",
+    "labelBoxBkgColor": "#f8fafc",
+    "labelBoxBorderColor": "#cbd5e1",
+    "noteBkgColor": "#f8fafc",
+    "noteBorderColor": "#cbd5e1",
+    "noteTextColor": "#334155"
+  }
+}}%%
 sequenceDiagram
     autonumber
     actor Eng as Engineer
@@ -144,32 +163,32 @@ sequenceDiagram
     participant Argo as Argo CD
     participant K8s as Kubernetes
 
-    rect rgb(200, 235, 215)
-        Note over Eng,K8s: 1. Stable Release
-        Eng->>Git: push nginx:1.27
+    rect rgb(237, 247, 240)
+        Note over Eng,K8s: 1. STABLE RELEASE
+        Eng->>Git: Push nginx:1.27
         Eng->>Argo: Refresh + Sync
-        Argo->>Git: fetch manifests
-        Argo->>K8s: apply
+        Argo->>Git: Fetch manifests
+        Argo->>K8s: Apply
         K8s-->>Argo: 2/2 Ready
         Argo-->>Eng: Synced + Healthy
     end
 
-    rect rgb(255, 220, 220)
-        Note over Eng,K8s: 2. Faulty Release
-        Eng->>Git: break.sh (nginx:does-not-exist-99)
+    rect rgb(252, 240, 240)
+        Note over Eng,K8s: 2. FAULTY RELEASE
+        Eng->>Git: break.sh<br/>Invalid image tag
         Eng->>Argo: Refresh + Sync
-        Argo->>Git: fetch manifests
-        Argo->>K8s: apply
+        Argo->>Git: Fetch manifests
+        Argo->>K8s: Apply
         K8s-->>Argo: ImagePullBackOff
         Argo-->>Eng: Synced + Degraded
     end
 
-    rect rgb(210, 230, 255)
-        Note over Eng,K8s: 3. Rollback via Git
-        Eng->>Git: rollback.sh (git revert + push)
+    rect rgb(238, 244, 252)
+        Note over Eng,K8s: 3. ROLLBACK VIA GIT
+        Eng->>Git: rollback.sh<br/>git revert + push
         Eng->>Argo: Refresh + Sync
-        Argo->>Git: fetch manifests
-        Argo->>K8s: apply nginx:1.27
+        Argo->>Git: Fetch manifests
+        Argo->>K8s: Apply nginx:1.27
         K8s-->>Argo: 2/2 Ready
         Argo-->>Eng: Synced + Healthy
     end
