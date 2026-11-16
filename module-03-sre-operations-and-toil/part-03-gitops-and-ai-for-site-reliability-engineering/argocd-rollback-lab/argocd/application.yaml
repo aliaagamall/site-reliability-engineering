@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rollback-demo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/aliaagamall/gitops-rollback-demo.git  
+    targetRevision: main
+    path: module-03-sre-operations-and-toil/part-03-gitops-and-ai-for-site-reliability-engineering/argocd-rollback-lab/gitops-repo/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  # No syncPolicy.automated block, so sync is manual
