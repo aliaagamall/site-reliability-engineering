@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/aliaagamall/gitops-rollback-demo.git  
+    repoURL: https://github.com/aliaagamall/site-reliability-engineering.git
     targetRevision: main
     path: module-03-sre-operations-and-toil/part-03-gitops-and-ai-for-site-reliability-engineering/argocd-rollback-lab/gitops-repo/manifests
   destination:
