@@ -18,9 +18,10 @@ Throughout this repository, I explore:
 - Monitoring, observability, and alerting.
 - Incident management and on-call operations.
 - Automation, toil reduction, and runbooks.
-- SLO tracking and burn rate alerts.
-- GitOps-based recovery and rollback.
-- AI-assisted reliability practices.
+- Reliability reviews and release decisions.
+- Production readiness and operational risk management.
+- GitOps-based deployments and recovery.
+- AI-assisted anomaly detection and incident analysis.
 
 ## Course Roadmap
 
@@ -41,17 +42,17 @@ Exploring observability fundamentals, monitoring dashboards, alerting strategies
 |---|---|---|
 | 01 | Observability Fundamentals for Reliable Systems | Documented |
 | 02 | Dashboards, Alerts, and SLO Monitoring | Documented |
-| 03 | Incident Management and On-Call Practices | Documented  |
+| 03 | Incident Management and On-Call Practices | Documented |
 
-### Module 03 — Automation, SLO Tracking, GitOps Recovery, and AI for SRE
+### Module 03 — SRE Operations, Reliability Decisions, and Intelligent Automation
 
-Applying automation and reliability engineering practices to reduce operational toil and improve recovery.
+Applying operational engineering practices to reduce toil, make evidence-based reliability decisions, improve deployment safety, and strengthen recovery using GitOps and AI-assisted approaches.
 
 | Part | Topic | Status |
 |---|---|---|
-| 01 | Toil Reduction and SRE Automation | Not Started |
-| 02 | SLO Tracking and Reliability Decisions | Not Started |
-| 03 | GitOps Recovery and AI-Enhanced SRE | Not Started |
+| 01 | Toil Reduction and Runbook Standardization | Documented |
+| 02 | Reliability Reviews and Release Decisions | Documented |
+| 03 | GitOps and AI for Site Reliability Engineering | Documented |
 
 ### Module 04 — Course Wrap-Up and Assessment
 
@@ -64,11 +65,12 @@ The course explores the following tools and technologies:
 - **Operating Systems:** Ubuntu, Linux
 - **Containers:** Docker
 - **Orchestration:** Kubernetes, kubectl, Helm
-- **GitOps:** GitHub, Argo CD
+- **GitOps:** GitHub, Argo CD, Flux
 - **Monitoring:** Prometheus, Grafana, PromQL
 - **SLO Management:** Pyrra
 - **Incident Management:** GoAlert
 - **Automation:** Ansible
+- **AI and Anomaly Detection:** Prophet, Isolation Forest, LangChain, LLMs
 - **Documentation:** Markdown
 
 Tools are introduced progressively as they become relevant to each topic.
@@ -78,22 +80,40 @@ Tools are introduced progressively as they become relevant to each topic.
 ```text
 site-reliability-engineering/
 ├── README.md
+│
 ├── module-01-foundations-of-sre/
 │   ├── part-01-introduction-to-sre-and-reliability-thinking/
 │   │   └── notes.md
+│   │
 │   └── part-02-service-health-metrics-and-reliability-targets/
 │       ├── notes.md
 │       ├── sre-error-budget-lab/
 │       └── sre-sli-slo-lab/
-└── module-02-observability/
-    ├── part-01-observability-fundamentals-for-reliable-systems/
+│
+├── module-02-observability/
+│   ├── part-01-observability-fundamentals-for-reliable-systems/
+│   │   ├── notes.md
+│   │   └── lab-01-sre-environment-setup.md
+│   │
+│   ├── part-02-dashboards-and-alerting/
+│   │   ├── notes.md
+│   │   ├── kubernetes-monitoring-stack-lab.md
+│   │   └── lab-slo-dashboard-grafana/
+│   │
+│   └── part-03-incident-management-and-on-call-practices/
+│       ├── notes.md
+│       ├── goalert-on-call-escalation-lab.md
+│       └── blameless-incident-postmortem-lab.md
+│
+└── module-03-sre-operations-and-toil/
+    ├── part-01-toil-reduction-and-runbook-standardization/
     │   ├── notes.md
-    │   └── lab-01-sre-environment-setup.md
-    ├── part-02-dashboards-and-alerting/
-    │   ├── notes.md
-    │   ├── kubernetes-monitoring-stack-lab.md
-    │   └── lab-slo-dashboard-grafana/
-    └── part-03-incident-management-and-on-call-practices/
+    │   └── runbook-creation-and-standardization.md
+    │
+    ├── part-02-reliability-reviews-and-release-decisions/
+    │   └── notes.md
+    │
+    └── part-03-gitops-and-ai-for-site-reliability-engineering/
         └── notes.md
 ```
 
@@ -121,7 +141,9 @@ Each topic is documented using a consistent approach:
 
 ## Progress
 
-This repository evolves alongside the learning process. New notes, labs, and practical implementations are added as each part of the course is completed.
+Modules 01, 02, and 03 have been documented, covering SRE foundations, observability, incident management, operational practices, reliability decisions, GitOps, and AI-assisted SRE.
+
+The repository will continue to evolve through the remaining course activities, assessments, and practical implementations.
 
 ---
 
