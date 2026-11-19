@@ -62,8 +62,8 @@ The dashboard configuration will be stored as JSON in the repository.
 | Panel | What it shows | Draft PromQL |
 |---|---|---|
 | Request rate | Checkout traffic | `sum(rate(http_requests_total{endpoint="/checkout"}[5m]))` |
-| Error rate | Share of failed requests | `sum(rate(http_requests_total{endpoint="/checkout",status=~"5..|408|429"}[5m])) / sum(rate(http_requests_total{endpoint="/checkout"}[5m]))` |
-| Availability | Share of successful requests | `1 - (sum(rate(http_requests_total{endpoint="/checkout",status=~"5..|408|429"}[5m])) / sum(rate(http_requests_total{endpoint="/checkout"}[5m])))` |
+| Error rate | Share of failed requests | `sum(rate(http_requests_total{endpoint="/checkout",status=~"5..\|408\|429"}[5m])) / sum(rate(http_requests_total{endpoint="/checkout"}[5m]))` |
+| Availability | Share of successful requests | `1 - (sum(rate(http_requests_total{endpoint="/checkout",status=~"5..\|408\|429"}[5m])) / sum(rate(http_requests_total{endpoint="/checkout"}[5m])))` |
 | Latency (p95) | 95th percentile request duration | `histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{endpoint="/checkout"}[5m])))` |
 | Requests within 300 ms | Latency SLI | `sum(rate(http_request_duration_seconds_bucket{endpoint="/checkout",le="0.3"}[5m])) / sum(rate(http_request_duration_seconds_count{endpoint="/checkout"}[5m]))` |
 | SLO compliance and budget | Current SLI and remaining Error Budget | Pyrra-generated metrics (names to be verified) |
