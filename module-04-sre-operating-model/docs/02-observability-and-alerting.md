@@ -5,105 +5,62 @@
 
 ## 1. Purpose
 
-This document defines how the SRE project monitors its application, visualizes reliability, detects problems, and routes alerts to the appropriate person.
+This document defines how `shop-api` is monitored, how reliability data is displayed, and how alerts reach the on-call engineer.
 
-The project uses one application, `shop-api`, running in a local Kubernetes cluster.
+SLI and SLO definitions are maintained in document 01.
 
-The monitoring design focuses on user-facing request metrics and Kubernetes health. All queries and thresholds are initial designs and will be verified during implementation.
+## 2. Metrics Collection
 
-## 2. Monitoring Scope
-
-The project contains one HTTP API application:
-
-| Component | Purpose |
-|---|---|
-| `shop-api` | Handles checkout requests and exposes application metrics |
-| Load Generator | Sends requests to simulate application traffic and failures |
-| Prometheus | Collects application and Kubernetes metrics |
-| Grafana | Displays metrics through dashboards |
-| Pyrra | Tracks SLOs and generates related alerting rules |
-| Alertmanager | Groups and routes alerts |
-| GoAlert | Notifies the on-call engineer |
-
-The application exposes three endpoints:
-
-| Endpoint | Purpose | Included in SLI? |
-|---|---|---|
-| `POST /checkout` | Main user-facing operation | Yes |
-| `/health` | Application health checks | No |
-| `/metrics` | Prometheus metrics endpoint | No |
-
-Only `/checkout` is included in the user-facing reliability measurements.
-
-## 3. Metrics Collection
-
-Prometheus collects two main categories of metrics.
+Prometheus will collect application and Kubernetes metrics.
 
 | Source | Metrics | Purpose |
 |---|---|---|
-| `shop-api` | Request count, request duration, HTTP status | Measure user experience and SLIs |
-| Kubernetes | Pod status, restarts, ready replicas, CPU, memory | Investigate application and container health |
+| `shop-api` | Request count, duration, HTTP status | Measure checkout reliability |
+| Kubernetes | Pod status, restarts, ready replicas | Monitor workload health |
+| Kubelet/cAdvisor | Container CPU and memory | Monitor resource usage |
 
-Kubernetes metrics are expected from:
+- Application metrics are exposed through `/metrics`.
+- `kube-state-metrics` provides Kubernetes object and Pod state metrics.
+- Kubelet/cAdvisor provides container resource metrics.
 
-- `kube-state-metrics` for pod status, container restarts, and replica information.
-- Kubelet / cAdvisor for container CPU and memory usage.
+## 3. Grafana Dashboard
 
-Application metrics are exposed through the `/metrics` endpoint.
+One dashboard, **Service Health**, will display the health of `shop-api`.
 
-The required application metrics are defined in document 01.
+The dashboard configuration will be stored in the repository.
 
-## 4. Grafana Dashboard
-
-One Grafana dashboard, **Service Health**, will display the health and reliability of `shop-api`.
-
-The dashboard configuration will be stored as JSON in the repository.
-
-| Panel | What it shows | Draft PromQL |
+| Panel | Purpose | Draft PromQL |
 |---|---|---|
 | Request rate | Checkout traffic | `sum(rate(http_requests_total{endpoint="/checkout"}[5m]))` |
 | Error rate | Share of failed requests | `sum(rate(http_requests_total{endpoint="/checkout",status=~"5..\|408\|429"}[5m])) / sum(rate(http_requests_total{endpoint="/checkout"}[5m]))` |
 | Availability | Share of successful requests | `1 - (sum(rate(http_requests_total{endpoint="/checkout",status=~"5..\|408\|429"}[5m])) / sum(rate(http_requests_total{endpoint="/checkout"}[5m])))` |
-| Latency (p95) | 95th percentile request duration | `histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{endpoint="/checkout"}[5m])))` |
+| p95 latency | 95th percentile request duration | `histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{endpoint="/checkout"}[5m])))` |
 | Requests within 300 ms | Latency SLI | `sum(rate(http_request_duration_seconds_bucket{endpoint="/checkout",le="0.3"}[5m])) / sum(rate(http_request_duration_seconds_count{endpoint="/checkout"}[5m]))` |
-| SLO compliance and budget | Current SLI and remaining Error Budget | Pyrra-generated metrics (names to be verified) |
-| Pod health | Container restarts and ready replicas | `increase(kube_pod_container_status_restarts_total{namespace="shop"}[1h])` |
+| SLO and Error Budget | SLO compliance and remaining budget | Pyrra-generated metrics |
+| Pod health | Restarts and ready replicas | Kubernetes metrics; exact queries depend on deployed metric labels |
 
-The error-rate query follows the failure criteria defined in document 01:
+The error-rate query uses the failure criteria from document 01: HTTP 5xx, 408, and 429.
 
-- HTTP 5xx responses.
-- HTTP 408 responses.
-- HTTP 429 responses.
+When there is no checkout traffic, the dashboard must show no data rather than a misleading availability or error-rate value.
 
-Availability is derived from the error rate.
+### Dashboard Sections
 
-Queries will be configured to handle periods with no traffic so that missing data is not displayed as a misleading reliability value.
-
-### Dashboard Layout
-
-The dashboard will have three sections:
-
-1. **SLO Status:** Availability, latency, and remaining Error Budget.
+1. **SLO Status:** Availability, latency, and Error Budget.
 2. **Application Performance:** Request rate, error rate, and latency.
 3. **Kubernetes Health:** Pod status, restarts, and resource usage.
 
-This layout helps the engineer identify user impact before investigating the application's Kubernetes environment.
+## 4. Alerting
 
-## 5. Alerting Principles
+Alerts should represent actionable application or reliability problems.
 
-1. **Alert on user impact.** Prioritize failing or slow checkout requests over infrastructure metrics alone.
-2. **Every page needs an action.** Alerts should require a clear human response.
-3. **Link alerts to useful information.** Each alert should include a dashboard and relevant runbook link.
-4. **Reduce unnecessary notifications.** Prefer a small number of actionable alerts.
+- Prioritize checkout failures and latency degradation.
+- Include dashboard and runbook links.
+- Group related alerts to reduce notification noise.
+- Use severity levels to control escalation.
 
-## 6. Burn Rate Alerts
+### Burn Rate Alerts
 
-Burn rate alerts detect when `shop-api` consumes its Error Budget faster than expected (see document 01).
-
-Each alert evaluates a long window and a short window together:
-
-- The long window detects sustained reliability problems.
-- The short window confirms that the problem is still happening.
+Each burn-rate alert uses a long evaluation window and a short confirmation window.
 
 | Alert | Burn Rate | Long Window | Short Window | Severity |
 |---|---:|---|---|---|
@@ -113,30 +70,28 @@ Each alert evaluates a long window and a short window together:
 
 The same approach applies to the latency SLO.
 
-Pyrra is expected to generate the Prometheus recording and alerting rules from the SLO definitions. The exact generated rules and thresholds will be verified during implementation.
+Pyrra is expected to generate the related Prometheus rules. Exact generated rules must be verified during implementation.
 
-## 7. Application and Pod Alerts
-
-Two additional alerts cover application availability and Kubernetes container health.
+### Application and Pod Alerts
 
 | Alert | Condition | Severity |
 |---|---|---|
-| Service down | The expected `shop-api` Prometheus target is unavailable for 2 minutes or disappears | SEV1 |
-| Crash looping | A `shop-api` container remains in `CrashLoopBackOff` for 5 minutes | SEV3 (ticket) |
+| Service down | `shop-api` Prometheus target is unavailable for 2 minutes or disappears | SEV1 |
+| Crash looping | A `shop-api` container remains in `CrashLoopBackOff` for 5 minutes | SEV3 |
 
-The exact PromQL expressions and metric labels will be confirmed against the deployed monitoring stack.
+Exact PromQL expressions and metric labels will be confirmed against the deployed monitoring stack.
 
-## 8. Severity Levels
+## 5. Severity Levels
 
-The same severity levels are used for alerts and incidents (document 03).
-
-| Level | Meaning | Response |
+| Level | Condition | Response |
 |---|---|---|
 | SEV1 | `shop-api` is unavailable or checkout is failing badly | Page the on-call engineer immediately |
-| SEV2 | Checkout is degraded and consuming its Error Budget quickly | Page the on-call engineer |
+| SEV2 | Checkout is degraded and consuming the Error Budget quickly | Page the on-call engineer |
 | SEV3 | Minor issue or early warning | Create a ticket for working-hours follow-up |
 
-## 9. Alert Routing and Noise Reduction
+These severity levels are also used by the incident process in document 03.
+
+## 6. Alert Routing
 
 ```mermaid
 flowchart LR
@@ -146,31 +101,32 @@ flowchart LR
     GA --> E[On-call Engineer]
 ```
 
-| Technique | How it reduces noise |
+### Noise Reduction
+
+| Technique | Purpose |
 |---|---|
-| Two-window burn rate | Reduces alerts caused by short-lived spikes |
-| `for` duration | Requires a condition to persist before firing |
-| Alert grouping | Combines related alerts into fewer notifications |
-| Inhibition | An active SEV1 suppresses lower-severity alerts for the same application |
-| Severity-based routing | Only SEV1 and SEV2 notifications page the on-call engineer |
+| Two-window burn rate | Confirms sustained and ongoing problems |
+| `for` duration | Prevents alerts from firing on brief spikes |
+| Alert grouping | Combines related alerts |
+| Inhibition | Suppresses lower-severity alerts when a related SEV1 is active |
+| Severity-based routing | Pages only for SEV1 and SEV2 |
 
-The Alertmanager-to-GoAlert integration and the SEV3 ticket destination will be verified during implementation.
+The Alertmanager-to-GoAlert integration and SEV3 ticket destination must be tested during implementation.
 
-## 10. Using the Dashboard During an Incident
+## 7. Incident Dashboard Workflow
 
-1. An alert arrives with a dashboard link.
-2. Open the Service Health dashboard and check the SLO panels.
-3. Compare request rate, error rate, and latency to understand the impact.
-4. Check pod status, restarts, and resource usage.
-5. Follow the runbook linked in the alert.
+1. Open the dashboard linked in the alert.
+2. Check SLO status and Error Budget.
+3. Review request rate, error rate, and latency.
+4. Check Pod status, restarts, and resource usage.
+5. Follow the relevant runbook.
 
-## 11. Open Items
+## 8. Open Items
 
-- Confirm application metric names and label values.
-- Verify error-rate and availability queries against actual HTTP responses.
-- Verify the 300 ms histogram bucket and latency calculation.
-- Confirm Kubernetes metric availability and labels.
-- Verify the Pyrra metrics and generated alerting rules.
-- Test the Alertmanager-to-GoAlert integration.
-- Decide where SEV3 tickets will be created.
-- Validate alert behavior using controlled traffic and failure scenarios.
+- Verify application metrics and PromQL queries.
+- Confirm Kubernetes metrics and labels.
+- Verify the dashboard panels and no-traffic behavior.
+- Validate Pyrra-generated alert rules.
+- Test Alertmanager-to-GoAlert routing.
+- Define the SEV3 ticket destination.
+- Test alerts using controlled traffic and failure scenarios.
