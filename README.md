@@ -54,9 +54,13 @@ Applying operational engineering practices to reduce toil, make evidence-based r
 | 02 | Reliability Reviews and Release Decisions | Documented |
 | 03 | GitOps and AI for Site Reliability Engineering | Documented |
 
-### Module 04 — Course Wrap-Up and Assessment
+### Module 04 — SRE Operating Model
 
-Consolidating the course concepts through final activities, assessments, and practical application.
+A standalone capstone project that designs and gradually implements an SRE operating model for a fictional Kubernetes-based company. It follows a design-first approach and is implemented step by step on a local `kind` cluster.
+
+| Project | Description | Status |
+|---|---|---|
+| [SRE Operating Model for CloudNova Systems](module-04-sre-operating-model/README.md) | SLOs, observability, incident management, automation, GitOps recovery, AI-assisted SRE, and governance | In progress (design phase) |
 
 ## Tools and Technologies
 
@@ -142,6 +146,8 @@ Each topic is documented using a consistent approach:
 ## Progress
 
 Modules 01, 02, and 03 have been documented, covering SRE foundations, observability, incident management, operational practices, reliability decisions, GitOps, and AI-assisted SRE.
+
+Module 04, a standalone SRE operating model project, is in progress and currently in its design phase.
 
 The repository will continue to evolve through the remaining course activities, assessments, and practical implementations.
 
