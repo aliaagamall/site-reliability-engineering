@@ -1,0 +1,10 @@
+# Store text files with LF line endings in the repository
+* text=auto eol=lf
+
+# Binary files: never convert line endings
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.pdf binary
+*.pptx binary
