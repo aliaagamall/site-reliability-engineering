@@ -16,7 +16,7 @@ The project covers six areas:
 - **Observability:** Collect metrics, build Grafana dashboards, and configure actionable alerts.
 - **Incident Management:** Define incident response, on-call escalation, runbooks, and postmortems.
 - **Toil Reduction:** Automate operational checks and recovery tasks using Ansible.
-- **GitOps Recovery and AI:** Manage application configuration through GitOps, test rollback procedures, and build a lightweight anomaly detector.
+- **GitOps Recovery and AI:** Manage application configuration through GitOps, test rollback procedures, and build a lightweight statistical anomaly detector using Z-scores.
 - **Governance and Continuous Improvement:** Track changes, document decisions, and review reliability practices.
 
 ## Project Approach
@@ -44,10 +44,10 @@ The project follows a design-first approach:
 |---|---|---|
 | 4.1 | Reliability Measurement and SLOs | Design only |
 | 4.2 | Observability, Dashboards, and Alerting | Design only |
-| 4.3 | Incident Management and On-call | Planned |
-| 4.4 | Toil Reduction | Planned |
-| 4.5 | GitOps Recovery and AI | Planned |
-| 4.6 | Governance and Continuous Improvement | Planned |
+| 4.3 | Incident Management and On-call | Design only |
+| 4.4 | Toil Reduction | Design only |
+| 4.5 | GitOps Recovery and AI | Design only |
+| 4.6 | Governance and Continuous Improvement | Design only |
 
 ## Project Structure
 
@@ -59,13 +59,13 @@ module-04-sre-operating-model/
 ├── docs/          # Design documents, report, presentation, and evidence
 ├── app/           # shop-api and load generator
 ├── cluster/       # kind configuration and scripts
-├── k8s/           # Kubernetes manifests
+├── k8s/           # Kubernetes manifests managed by Argo CD
+├── argocd/        # Argo CD Application definition
 ├── monitoring/    # Prometheus, Grafana, Pyrra, and alert rules
 ├── oncall/        # GoAlert configuration
 ├── runbooks/      # Operational procedures
 ├── postmortems/   # Postmortem template and reports
 ├── ansible/       # Operational automation
-├── gitops/        # Argo CD configuration
 └── ai/            # Anomaly detection and incident summaries
 ```
 

@@ -16,7 +16,8 @@ Project configuration, automation, and operational documentation are version-con
 | SLO definitions | `monitoring/` | YAML |
 | Alert rules | `monitoring/` | YAML |
 | Grafana dashboards | `monitoring/` | JSON |
-| Kubernetes manifests managed by Argo CD | `gitops/` | YAML |
+| Kubernetes manifests managed by Argo CD | `k8s/` | YAML |
+| Argo CD Application definition | `argocd/` | YAML |
 | Runbooks | `runbooks/` | Markdown |
 | Postmortems and template | `postmortems/` | Markdown |
 | Ansible playbooks | `ansible/` | YAML |
@@ -57,7 +58,8 @@ Review outcomes are recorded in a short Markdown note in the repository.
 
 ## 5. Deployment and Rollback History
 
-- Deployment changes are recorded as Git commits in `gitops/`.
+- Kubernetes deployment changes are recorded as Git commits in `k8s/`.
+- Changes to the Argo CD Application definition are recorded in `argocd/`.
 - Argo CD maintains the sync history for the application.
 - A rollback is a revert commit linked from the incident issue (document 05).
 

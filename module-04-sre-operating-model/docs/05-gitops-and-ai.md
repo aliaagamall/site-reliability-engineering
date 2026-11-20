@@ -11,9 +11,10 @@ This document defines how `shop-api` is deployed and recovered through GitHub an
 
 | Item | Design |
 |---|---|
-| Source of truth | Kubernetes manifests in the `gitops/` folder of the GitHub repository |
+| Source of truth | Kubernetes manifests in the `k8s/` folder of the GitHub repository |
+| Argo CD Application definition | YAML configuration stored in the `argocd/` folder |
+| Argo CD Application | One application defined in `argocd/` that watches `k8s/` and deploys to the `shop` namespace |
 | Repository access | Public repository for this project. A private repository with a read-only token is also supported by Argo CD but is not implemented |
-| Argo CD Application | One application that watches `gitops/` and deploys to the `shop` namespace |
 | Sync | Automatic sync from Git |
 | Drift handling | Self-heal is disabled so drift stays visible as `OutOfSync` and an engineer decides what to do |
 
@@ -21,7 +22,7 @@ Sync and drift settings are design choices and must be verified during implement
 
 ## 3. Drift Detection
 
-Argo CD compares the live cluster with the manifests in Git. If they differ, for example after a manual `kubectl` change, the application shows as `OutOfSync`.
+Argo CD compares the live cluster with the Kubernetes manifests in `k8s/`. If they differ, for example after a manual `kubectl` change, the application shows as `OutOfSync`.
 
 The engineer then chooses:
 
@@ -98,7 +99,7 @@ The script will use Git history to identify recent changes. Linking a specific c
 
 ## 9. Open Items
 
-- Create the Argo CD Application and verify sync and drift behavior.
+- Store the Argo CD Application definition in `argocd/`, point it to `k8s/`, and verify sync and drift behavior.
 - Choose how the faulty version is produced.
 - Test a rollback through Git revert and verify recovery.
 - Implement the statistical detector and test it with controlled traffic.

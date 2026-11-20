@@ -24,7 +24,7 @@ The application exposes a checkout operation and supports controlled failure sce
 - Prometheus, Grafana, and Pyrra for monitoring and SLO tracking.
 - Alertmanager and GoAlert for alert routing and on-call notifications.
 - Incident procedures, runbooks, and a simulated incident with a postmortem.
-- Ansible playbooks for health checks, restarts, and configuration validation.
+- Ansible playbooks for health checks, restarts, configuration validation, and health collection.
 - GitHub and Argo CD for GitOps synchronization and rollback.
 - A lightweight Z-score detector and incident-summary drafts.
 - Governance through pull requests, templates, and operational records.
@@ -58,7 +58,7 @@ flowchart LR
         subgraph oc["namespace: oncall"]
             GA[GoAlert]
         end
-        subgraph gitops["namespace: argocd"]
+        subgraph argocd_ns["namespace: argocd"]
             ARGO[Argo CD]
         end
     end
@@ -71,8 +71,14 @@ flowchart LR
     AM -- webhook --> GA
     GA -- pages --> ENG[On-call engineer]
 
-    GH[(GitHub repository)] -- watched by --> ARGO
-    ARGO -- syncs manifests --> API
+    GH[(GitHub repository)]
+    AC[argocd/ Application definition]
+    K8S[k8s/ Kubernetes manifests]
+    GH -- contains --> AC
+    GH -- contains --> K8S
+    AC -. defines source path .-> K8S
+    ARGO -- watches --> K8S
+    ARGO -- syncs resources --> API
     ENG -- reverts commit --> GH
 
     ANS[Ansible playbooks] -- health checks, restarts --> API
@@ -83,21 +89,21 @@ flowchart LR
     classDef app fill:#0d419d,stroke:#58a6ff,stroke-width:1.5px,color:#e6edf3
     classDef monitoring fill:#0d4429,stroke:#3fb950,stroke-width:1.5px,color:#e6edf3
     classDef oncall fill:#4d2b00,stroke:#f0883e,stroke-width:1.5px,color:#e6edf3
-    classDef gitops fill:#3b1f6e,stroke:#a371f7,stroke-width:1.5px,color:#e6edf3
+    classDef argocd fill:#3b1f6e,stroke:#a371f7,stroke-width:1.5px,color:#e6edf3
     classDef automation fill:#3d2e00,stroke:#d29922,stroke-width:1.5px,color:#e6edf3
 
-    class LG,GH external
+    class LG,GH,AC,K8S external
     class API app
     class PROM,GRAF,PYR,AM monitoring
     class GA,ENG oncall
-    class ARGO gitops
+    class ARGO argocd
     class ANS,AI automation
 
     style kind fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
     style shop fill:#0d419d,stroke:#58a6ff,stroke-width:1.5px,color:#e6edf3
     style mon fill:#0d4429,stroke:#3fb950,stroke-width:1.5px,color:#e6edf3
     style oc fill:#4d2b00,stroke:#f0883e,stroke-width:1.5px,color:#e6edf3
-    style gitops fill:#3b1f6e,stroke:#a371f7,stroke-width:1.5px,color:#e6edf3
+    style argocd_ns fill:#3b1f6e,stroke:#a371f7,stroke-width:1.5px,color:#e6edf3
 ```
 
 ## 5. Components
