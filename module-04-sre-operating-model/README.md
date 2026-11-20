@@ -8,6 +8,12 @@ This project develops and implements an SRE operating model around one Python HT
 
 The application exposes a checkout operation and supports controlled failure scenarios. This makes it possible to practice reliability measurement, monitoring, incident response, automation, and recovery without real customer traffic or cloud infrastructure.
 
+## Architecture
+
+The following diagram illustrates the overall architecture of the SRE operating model, including the application, monitoring stack, incident management, GitOps, and automation components.
+
+![CloudNova SRE Architecture](docs/architecture/cloudnova-sre-architecture.svg)
+
 ## SRE Capabilities
 
 The project covers six areas:
@@ -56,7 +62,19 @@ Folders will be created as their implementation begins.
 ```text
 module-04-sre-operating-model/
 ├── README.md
-├── docs/          # Design documents, report, presentation, and evidence
+├── docs/
+│   ├── 00-scope-and-architecture.md
+│   ├── 01-slo-strategy.md
+│   ├── 02-observability-and-alerting.md
+│   ├── 03-incident-management.md
+│   ├── 04-toil-and-automation.md
+│   ├── 05-gitops-and-ai.md
+│   ├── 06-governance.md
+│   ├── architecture/
+│   │   └── cloudnova_sre_architecture.svg
+│   └── presentation/
+│       ├── sre-operating-model-presentation.pdf
+│       └── sre-operating-model-presentation.pptx
 ├── app/           # shop-api and load generator
 ├── cluster/       # kind configuration and scripts
 ├── k8s/           # Kubernetes manifests managed by Argo CD
