@@ -43,46 +43,61 @@ The application exposes a checkout operation and supports controlled failure sce
 
 ```mermaid
 flowchart LR
-    LG[Load Generator] --> API
+    LG[Load generator] --> API
 
-    subgraph kind["Local kind Cluster"]
+    subgraph kind["Local kind cluster"]
         subgraph shop["namespace: shop"]
             API[shop-api]
         end
-
         subgraph mon["namespace: monitoring"]
             PROM[Prometheus]
             GRAF[Grafana]
             PYR[Pyrra]
             AM[Alertmanager]
-            KSM[kube-state-metrics]
         end
-
         subgraph oc["namespace: oncall"]
             GA[GoAlert]
         end
-
         subgraph gitops["namespace: argocd"]
             ARGO[Argo CD]
         end
     end
 
-    PROM -->|scrapes| API
-    PROM -->|collects cluster metrics| KSM
-    GRAF -->|queries| PROM
-    PYR -->|uses SLO metrics| PROM
-    PYR -.->|generates rules| PROM
-    PROM -->|alerts| AM
-    AM -->|webhook| GA
-    GA --> ENG[On-call Engineer]
+    PROM -- scrapes metrics --> API
+    GRAF -- queries --> PROM
+    PYR -- reads SLO metrics --> PROM
+    PYR -. generates SLO rules .-> PROM
+    PROM -- fires alerts --> AM
+    AM -- webhook --> GA
+    GA -- pages --> ENG[On-call engineer]
 
-    GH[(GitHub Repository)] --> ARGO
-    ARGO -->|syncs manifests| API
-    ENG -->|reverts commit| GH
+    GH[(GitHub repository)] -- watched by --> ARGO
+    ARGO -- syncs manifests --> API
+    ENG -- reverts commit --> GH
 
-    ANS[Ansible Playbooks] -->|operational tasks| API
-    AI[Z-score Detector] -->|queries metrics| PROM
-    AI -->|drafts summary| ENG
+    ANS[Ansible playbooks] -- health checks, restarts --> API
+    AI[Z-score detector and summarizer] -- queries --> PROM
+    AI -- draft summary --> ENG
+
+    classDef external fill:#21262d,stroke:#8b949e,stroke-width:1.5px,color:#e6edf3
+    classDef app fill:#0d419d,stroke:#58a6ff,stroke-width:1.5px,color:#e6edf3
+    classDef monitoring fill:#0d4429,stroke:#3fb950,stroke-width:1.5px,color:#e6edf3
+    classDef oncall fill:#4d2b00,stroke:#f0883e,stroke-width:1.5px,color:#e6edf3
+    classDef gitops fill:#3b1f6e,stroke:#a371f7,stroke-width:1.5px,color:#e6edf3
+    classDef automation fill:#3d2e00,stroke:#d29922,stroke-width:1.5px,color:#e6edf3
+
+    class LG,GH external
+    class API app
+    class PROM,GRAF,PYR,AM monitoring
+    class GA,ENG oncall
+    class ARGO gitops
+    class ANS,AI automation
+
+    style kind fill:#161b22,stroke:#30363d,stroke-width:2px,color:#e6edf3
+    style shop fill:#0d419d,stroke:#58a6ff,stroke-width:1.5px,color:#e6edf3
+    style mon fill:#0d4429,stroke:#3fb950,stroke-width:1.5px,color:#e6edf3
+    style oc fill:#4d2b00,stroke:#f0883e,stroke-width:1.5px,color:#e6edf3
+    style gitops fill:#3b1f6e,stroke:#a371f7,stroke-width:1.5px,color:#e6edf3
 ```
 
 ## 5. Components
