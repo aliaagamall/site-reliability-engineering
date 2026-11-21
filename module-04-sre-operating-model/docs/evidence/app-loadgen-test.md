@@ -1,9 +1,9 @@
 # Load Generator Test Results
 
-- **Date (UTC):** 2026-11-21 13:33:17
+- **Date (UTC):** 2026-11-21 13:37:05
 - **Python:** Python 3.12.3
-- **Environment:** local run, `app/loadgen.py` against `shop-api` on Gunicorn
-- **Command:** `app/loadgen-test.sh`
+- **Environment:** local run, `loadgen/loadgen.py` against `shop-api` on Gunicorn
+- **Command:** `tests/loadgen-test.sh`
 - **Result:** 12 of 12 checks passed
 
 ## Checks
@@ -33,7 +33,7 @@ Summary
   duration: 5.0 s
   requests sent: 100
   status 200: 100
-  latency p50 / p95 / max: 48 / 80 / 84 ms
+  latency p50 / p95 / max: 55 / 83 / 85 ms
   within 300 ms: 100.0%
 ```
 
@@ -45,6 +45,6 @@ Summary
   duration: 2.0 s
   requests sent: 20
   status 500: 20
-  latency p50 / p95 / max: 40 / 85 / 96 ms
+  latency p50 / p95 / max: 48 / 82 / 88 ms
   within 300 ms: 100.0%
 ```

@@ -5,8 +5,9 @@ set -uo pipefail
 export LC_ALL=C
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV="$SCRIPT_DIR/.venv"
-LOADGEN="$SCRIPT_DIR/loadgen.py"
+APP_DIR="$(cd "$SCRIPT_DIR/../app" && pwd)"
+VENV="$APP_DIR/.venv"
+LOADGEN="$(cd "$SCRIPT_DIR/../loadgen" && pwd)/loadgen.py"
 PORT="${PORT:-8080}"
 PORT_DOWN="${PORT_DOWN:-8099}"
 REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/app-loadgen-test.md}"
@@ -56,7 +57,7 @@ set_faults() { curl -s -o /dev/null -X POST -H "$JSON" -d "$1" "$BASE/admin/faul
 # Setup 
 if [ ! -x "$VENV/bin/gunicorn" ]; then
   echo "Creating virtual environment..."
-  python3 -m venv "$VENV" && "$VENV/bin/pip" install -q -r "$SCRIPT_DIR/requirements.txt" || {
+  python3 -m venv "$VENV" && "$VENV/bin/pip" install -q -r "$APP_DIR/requirements.txt" || {
     echo "Could not set up the virtual environment."
     exit 1
   }
@@ -70,7 +71,7 @@ done
 
 echo "Starting shop-api on port $PORT..."
 ADMIN_ENABLED=true "$VENV/bin/gunicorn" -w 1 --threads 8 -b "127.0.0.1:$PORT" \
-  --chdir "$SCRIPT_DIR" app:app >"$LOG_DIR/app.log" 2>&1 &
+  --chdir "$APP_DIR" app:app >"$LOG_DIR/app.log" 2>&1 &
 APP_PID=$!
 for _ in $(seq 1 40); do
   [ "$(code GET "$BASE/health")" = "200" ] && break
@@ -142,8 +143,8 @@ mkdir -p "$(dirname "$REPORT")"
 
 - **Date (UTC):** $(date -u '+%Y-%m-%d %H:%M:%S')
 - **Python:** $(python3 --version 2>&1)
-- **Environment:** local run, \`app/loadgen.py\` against \`shop-api\` on Gunicorn
-- **Command:** \`app/loadgen-test.sh\`
+- **Environment:** local run, \`loadgen/loadgen.py\` against \`shop-api\` on Gunicorn
+- **Command:** \`tests/loadgen-test.sh\`
 - **Result:** $PASSED of $TOTAL checks passed
 
 ## Checks
