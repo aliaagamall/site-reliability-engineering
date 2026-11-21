@@ -5,6 +5,7 @@ set -uo pipefail
 export LC_ALL=C
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="$(cd "$SCRIPT_DIR/../app" && pwd)"
 IMAGE="shop-api:1.0.0"
 NAME="shop-api-test"
 PORT="${PORT:-8080}"
@@ -39,7 +40,7 @@ fi
 
 cleanup
 echo "Building $IMAGE..."
-if ! docker build -q -t "$IMAGE" "$SCRIPT_DIR" >/dev/null; then
+if ! docker build -q -t "$IMAGE" "$APP_DIR" >/dev/null; then
   echo "Image build failed."
   exit 1
 fi
@@ -93,7 +94,7 @@ mkdir -p "$(dirname "$REPORT")"
 - **Docker:** $(docker --version)
 - **Image:** \`$IMAGE\` ($SIZE)
 - **Container exit code after crash:** $exit_code
-- **Command:** \`app/docker-test.sh\`
+- **Command:** \`tests/docker-test.sh\`
 - **Result:** $PASSED of $TOTAL checks passed
 
 ## Checks

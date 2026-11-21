@@ -5,7 +5,8 @@ set -uo pipefail
 export LC_ALL=C
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV="$SCRIPT_DIR/.venv"
+APP_DIR="$(cd "$SCRIPT_DIR/../app" && pwd)"
+VENV="$APP_DIR/.venv"
 PORT="${PORT:-8080}"
 PORT_NOADMIN="${PORT_NOADMIN:-8081}"
 REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/app-smoke-test.md}"
@@ -56,7 +57,7 @@ check() {
 start_app() {
   local port="$1" admin="$2" i
   ADMIN_ENABLED="$admin" "$VENV/bin/gunicorn" -w 1 --threads 8 \
-    -b "127.0.0.1:$port" --chdir "$SCRIPT_DIR" app:app >"$LOG_DIR/app-$port.log" 2>&1 &
+    -b "127.0.0.1:$port" --chdir "$APP_DIR" app:app >"$LOG_DIR/app-$port.log" 2>&1 &
   PIDS+=("$!")
   for i in $(seq 1 40); do
     [ "$(code GET "http://127.0.0.1:$port/health")" = "200" ] && return 0
@@ -70,7 +71,7 @@ start_app() {
 # Setup 
 if [ ! -x "$VENV/bin/gunicorn" ]; then
   echo "Creating virtual environment..."
-  python3 -m venv "$VENV" && "$VENV/bin/pip" install -q -r "$SCRIPT_DIR/requirements.txt" || {
+  python3 -m venv "$VENV" && "$VENV/bin/pip" install -q -r "$APP_DIR/requirements.txt" || {
     echo "Could not set up the virtual environment."
     exit 1
   }
@@ -154,7 +155,7 @@ mkdir -p "$(dirname "$REPORT")"
 - **Python:** $("$VENV/bin/python" --version 2>&1)
 - **Gunicorn:** $("$VENV/bin/gunicorn" --version 2>&1)
 - **Environment:** local run with Gunicorn (one worker, 8 threads), not yet in Docker or Kubernetes
-- **Command:** \`app/smoke-test.sh\`
+- **Command:** \`tests/smoke-test.sh\`
 - **Result:** $PASSED of $TOTAL checks passed
 
 ## Checks

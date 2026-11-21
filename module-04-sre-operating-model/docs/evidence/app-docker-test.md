@@ -1,10 +1,10 @@
 # shop-api Docker Test Results
 
-- **Date (UTC):** 2026-11-21 13:26:40
+- **Date (UTC):** 2026-11-21 13:36:31
 - **Docker:** Docker version 29.1.2, build 890dcca
 - **Image:** `shop-api:1.0.0` (188MB)
 - **Container exit code after crash:** 3
-- **Command:** `app/docker-test.sh`
+- **Command:** `tests/docker-test.sh`
 - **Result:** 9 of 9 checks passed
 
 ## Checks
