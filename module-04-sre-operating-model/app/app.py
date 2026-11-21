@@ -1,7 +1,6 @@
 import logging
 import os
 import random
-import signal
 import threading
 import time
 
@@ -116,10 +115,11 @@ def admin_faults():
     return jsonify(current_faults())
 
 
-def terminate_process(kill_master):
-    if kill_master:
-        os.kill(os.getppid(), signal.SIGKILL)
-    os._exit(1)
+def terminate_process():
+    # Exit code 3 tells the Gunicorn master that the worker is unrecoverable,
+    # so the master shuts down too instead of restarting the worker. The
+    # container's main process then exits, as in a real crash.
+    os._exit(3)
 
 
 @app.post("/admin/crash")
@@ -127,6 +127,5 @@ def admin_crash():
     if not admin_enabled():
         abort(404)
     app.logger.warning("crash requested: terminating the process")
-    under_gunicorn = request.environ.get("SERVER_SOFTWARE", "").startswith("gunicorn")
-    threading.Timer(0.5, terminate_process, args=(under_gunicorn,)).start()
+    threading.Timer(0.5, terminate_process).start()
     return jsonify({"status": "crashing"}), 202
