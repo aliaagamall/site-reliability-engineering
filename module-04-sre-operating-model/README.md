@@ -75,7 +75,9 @@ module-04-sre-operating-model/
 │   └── presentation/
 │       ├── sre-operating-model-presentation.pdf
 │       └── sre-operating-model-presentation.pptx
-├── app/           # shop-api and load generator
+├── app/           # shop-api application and Dockerfile
+├── loadgen/       # load generator
+├── tests/         # local test scripts
 ├── cluster/       # kind configuration and scripts
 ├── k8s/           # Kubernetes manifests managed by Argo CD
 ├── argocd/        # Argo CD Application definition
