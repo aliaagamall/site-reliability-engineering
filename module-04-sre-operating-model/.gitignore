@@ -1,2 +1,7 @@
 .venv/
 __pycache__/
+
+# Local environment files may hold secrets. Only .env.example is tracked.
+.env
+.env.*
+!.env.example
