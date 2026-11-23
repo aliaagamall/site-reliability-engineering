@@ -1,0 +1,7 @@
+# Prometheus Operator, pinned to one release, installed in the monitoring namespace.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+resources:
+  - namespace.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.95.2/bundle.yaml
