@@ -1,0 +1,38 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kube-state-metrics
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: ["monitoring"]
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kube-state-metrics
+  endpoints:
+    - port: http-metrics
+      interval: 15s
+      # Keep the namespace and pod labels set by kube-state-metrics.
+      honorLabels: true
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kubelet-cadvisor
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: ["kube-system"]
+  selector:
+    matchLabels:
+      k8s-app: kubelet
+  endpoints:
+    - port: https-metrics
+      scheme: https
+      path: /metrics/cadvisor
+      interval: 15s
+      honorLabels: true
+      bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      tlsConfig:
+        # The kubelet in kind uses a self-signed certificate. Local lab only.
+        insecureSkipVerify: true
