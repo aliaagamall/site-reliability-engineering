@@ -1,6 +1,6 @@
 # Kubernetes Deployment Test Results
 
-- **Date (UTC):** 2026-11-21 16:07:41
+- **Date (UTC):** 2026-11-24 12:07:47
 - **Kubernetes server:** v1.37.0
 - **Image:** `shop-api:1.0.0` (loaded into kind, not pulled from a registry)
 - **Manifests:** `k8s/`, applied with `kubectl apply` (Argo CD takes over this role later)
@@ -31,9 +31,9 @@ It is not a CrashLoopBackOff, which is tested separately later.
 ## Resources in the shop namespace (after the crash test)
 
 ```
-NAME                           READY   STATUS    RESTARTS     AGE   IP           NODE                          NOMINATED NODE   READINESS GATES
-pod/shop-api-c698b845b-n7vrr   1/1     Running   1 (9s ago)   19s   10.244.0.5   cloudnova-sre-control-plane   <none>           <none>
+NAME                           READY   STATUS    RESTARTS      AGE   IP           NODE                          NOMINATED NODE   READINESS GATES
+pod/shop-api-c698b845b-4tl56   1/1     Running   1 (14s ago)   20s   10.244.0.6   cloudnova-sre-control-plane   <none>           <none>
 
-NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE   SELECTOR
-service/shop-api   ClusterIP   10.96.116.71   <none>        8080/TCP   19s   app.kubernetes.io/name=shop-api
+NAME               TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE   SELECTOR
+service/shop-api   NodePort   10.96.226.236   <none>        8080:30080/TCP   20s   app.kubernetes.io/name=shop-api
 ```

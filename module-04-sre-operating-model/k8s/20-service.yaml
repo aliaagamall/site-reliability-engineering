@@ -6,9 +6,11 @@ metadata:
   labels:
     app.kubernetes.io/name: shop-api
 spec:
+  type: NodePort
   selector:
     app.kubernetes.io/name: shop-api
   ports:
     - name: http
       port: 8080
       targetPort: http
+      nodePort: 30080
