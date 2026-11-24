@@ -3,3 +3,11 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: cloudnova-sre
 nodes:
   - role: control-plane
+    extraPortMappings:
+      - { containerPort: 30080, hostPort: 30080, listenAddress: "127.0.0.1", protocol: TCP }  # shop-api
+      - { containerPort: 30300, hostPort: 30300, listenAddress: "127.0.0.1", protocol: TCP }  # Grafana
+      - { containerPort: 30900, hostPort: 30900, listenAddress: "127.0.0.1", protocol: TCP }  # Prometheus
+      - { containerPort: 30093, hostPort: 30093, listenAddress: "127.0.0.1", protocol: TCP }  # Alertmanager
+      - { containerPort: 30099, hostPort: 30099, listenAddress: "127.0.0.1", protocol: TCP }  # Pyrra
+      - { containerPort: 30081, hostPort: 30081, listenAddress: "127.0.0.1", protocol: TCP }  # GoAlert
+      - { containerPort: 30443, hostPort: 30443, listenAddress: "127.0.0.1", protocol: TCP }  # Argo CD

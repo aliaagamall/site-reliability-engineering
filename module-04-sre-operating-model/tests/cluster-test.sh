@@ -52,6 +52,12 @@ sc="no"
 $K get storageclass -o jsonpath='{range .items[*]}{.metadata.annotations.storageclass\.kubernetes\.io/is-default-class}{"\n"}{end}' 2>/dev/null | grep -qx true && sc="yes"
 check "A default StorageClass exists" yes "$sc"
 
+published=0
+for p in 30080 30300 30900 30093 30099 30081 30443; do
+  docker port "$CLUSTER-control-plane" 2>/dev/null | grep -q "127.0.0.1:$p$" && published=$((published + 1))
+done
+check "All 7 node ports are published on 127.0.0.1" 7 "$published"
+
 TOTAL=${#RESULTS[@]}
 PASSED=$((TOTAL - FAILED))
 FENCE='```'
