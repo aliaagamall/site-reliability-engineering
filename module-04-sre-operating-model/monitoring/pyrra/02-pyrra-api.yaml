@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: api
+    app.kubernetes.io/name: pyrra
+    app.kubernetes.io/version: 0.10.2
+  name: pyrra-api
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: api
+      app.kubernetes.io/name: pyrra
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: api
+        app.kubernetes.io/name: pyrra
+        app.kubernetes.io/version: 0.10.2
+    spec:
+      containers:
+      - args:
+        - api
+        - --api-url=http://pyrra-kubernetes.monitoring.svc.cluster.local:9444
+        - --prometheus-url=http://prometheus.monitoring.svc.cluster.local:9090
+        image: ghcr.io/pyrra-dev/pyrra:v0.10.2
+        name: pyrra
+        resources:
+          requests:
+            cpu: 20m
+            memory: 64Mi
+          limits:
+            memory: 192Mi
+        ports:
+        - containerPort: 9099
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        kubernetes.io/os: linux
+      serviceAccountName: pyrra-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: api
+    app.kubernetes.io/name: pyrra
+    app.kubernetes.io/version: 0.10.2
+  name: pyrra-api
+  namespace: monitoring
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 9099
+    targetPort: 9099
+    nodePort: 30099
+  selector:
+    app.kubernetes.io/component: api
+    app.kubernetes.io/name: pyrra
