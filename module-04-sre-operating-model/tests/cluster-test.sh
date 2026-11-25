@@ -11,7 +11,7 @@ export LC_ALL=C
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CLUSTER="cloudnova-sre"
 K="kubectl --context kind-$CLUSTER"
-REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/cluster-test.md}"
+REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/tests/cluster-test.md}"
 RESULTS=()
 FAILED=0
 

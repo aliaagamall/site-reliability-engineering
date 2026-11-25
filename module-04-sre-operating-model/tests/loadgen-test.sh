@@ -10,7 +10,7 @@ VENV="$APP_DIR/.venv"
 LOADGEN="$(cd "$SCRIPT_DIR/../loadgen" && pwd)/loadgen.py"
 PORT="${PORT:-8080}"
 PORT_DOWN="${PORT_DOWN:-8099}"
-REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/app-loadgen-test.md}"
+REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/tests/app-loadgen-test.md}"
 BASE="http://127.0.0.1:$PORT"
 JSON='Content-Type: application/json'
 

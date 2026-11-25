@@ -13,7 +13,7 @@ OPERATOR_DIR="$(cd "$SCRIPT_DIR/../monitoring/operator" && pwd)"
 CLUSTER="cloudnova-sre"
 KC="kubectl --context kind-$CLUSTER"
 K="$KC -n monitoring"
-REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/operator-test.md}"
+REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/tests/operator-test.md}"
 RESULTS=()
 FAILED=0
 

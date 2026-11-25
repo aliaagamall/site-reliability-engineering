@@ -27,7 +27,7 @@ Optional overrides for the scripts in `tests/`. The defaults work for the standa
 | `PORT_NOADMIN` | `smoke-test.sh` | `8081` | No | Port for the instance started without admin endpoints |
 | `PORT_DOWN` | `loadgen-test.sh` | `8099` | No | Port with nothing listening, for the unreachable-app test |
 | `LOCAL_PORT` | `k8s-test.sh` | `18080` | No | Local port for `kubectl port-forward` |
-| `REPORT` | every script in `tests/` | `docs/evidence/<test-name>.md` | No | Output path of the Markdown report |
+| `REPORT` | every script in `tests/` | `docs/evidence/tests/<test-name>.md` | No | Output path of the Markdown report |
 
 ## Secrets
 

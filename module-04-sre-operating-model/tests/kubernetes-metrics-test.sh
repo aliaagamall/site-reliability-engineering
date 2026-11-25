@@ -15,7 +15,7 @@ CLUSTER="cloudnova-sre"
 KC="kubectl --context kind-$CLUSTER"
 K="$KC -n monitoring"
 PROM="http://127.0.0.1:30900"
-REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/kubernetes-metrics-test.md}"
+REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/tests/kubernetes-metrics-test.md}"
 RESULTS=()
 FAILED=0
 

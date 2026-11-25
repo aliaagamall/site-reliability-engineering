@@ -16,7 +16,7 @@ KC="kubectl --context kind-$CLUSTER"
 K="$KC -n monitoring"
 PROM="http://127.0.0.1:30900"
 APP="http://127.0.0.1:30080"
-REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/prometheus-test.md}"
+REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/tests/prometheus-test.md}"
 RESULTS=()
 FAILED=0
 

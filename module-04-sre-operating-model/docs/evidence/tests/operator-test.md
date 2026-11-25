@@ -1,6 +1,6 @@
 # Prometheus Operator Test Results
 
-- **Date (UTC):** 2026-11-23 22:55:22
+- **Date (UTC):** 2026-11-24 12:07:19
 - **Kubernetes server:** v1.37.0
 - **Operator image:** `quay.io/prometheus-operator/prometheus-operator:v0.95.2`
 - **Manifests:** `monitoring/operator/`, applied with `kubectl apply --server-side -k`
@@ -24,5 +24,5 @@
 
 ```
 NAME                                  READY   STATUS    RESTARTS   AGE
-prometheus-operator-66cffdb58-xbkr2   1/1     Running   0          15s
+prometheus-operator-66cffdb58-hhb7b   1/1     Running   0          21s
 ```

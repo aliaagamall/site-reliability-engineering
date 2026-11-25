@@ -15,7 +15,7 @@ KC="kubectl --context kind-$CLUSTER"
 K="$KC -n monitoring"
 UI="http://127.0.0.1:30099"
 EXPECTED_IMAGE="ghcr.io/pyrra-dev/pyrra:v0.10.2"
-REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/pyrra-test.md}"
+REPORT="${REPORT:-$SCRIPT_DIR/../docs/evidence/tests/pyrra-test.md}"
 RESULTS=()
 FAILED=0
 

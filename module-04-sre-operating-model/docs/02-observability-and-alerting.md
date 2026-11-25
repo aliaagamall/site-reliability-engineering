@@ -60,7 +60,7 @@ Alerts should represent actionable application or reliability problems.
 
 ### Burn Rate Alerts
 
-Each burn-rate alert uses a long evaluation window and a short confirmation window. Pyrra generates these rules from the SLO definitions in `monitoring/slos/`, so they are not written by hand. The tiers, thresholds, and windows are Pyrra's defaults, verified against the generated rules in `evidence/slo-test.md`.
+Each burn-rate alert uses a long evaluation window and a short confirmation window. Pyrra generates these rules from the SLO definitions in `monitoring/slos/`, so they are not written by hand. The tiers, thresholds, and windows are Pyrra's defaults, verified against the generated rules in `evidence/tests/slo-test.md`.
 
 | Alert tier | Burn Rate | Long Window | Short Window | For | Severity |
 |---|---:|---|---|---|---|
