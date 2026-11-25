@@ -1,0 +1,24 @@
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: shop-api-availability
+  namespace: monitoring
+  labels:
+    service: shop-api
+spec:
+  description: Share of checkout requests that are not 5xx, 408, or 429.
+  target: "99.9"
+  window: 28d
+  alerting:
+    severities:
+      fastBurn: sev1
+      mediumBurn: sev2
+      slowBurn: sev3
+      longTermBurn: sev3
+      absent: sev2
+  indicator:
+    ratio:
+      errors:
+        metric: http_requests_total{job="shop-api",endpoint="/checkout",status=~"5..|408|429"}
+      total:
+        metric: http_requests_total{job="shop-api",endpoint="/checkout"}

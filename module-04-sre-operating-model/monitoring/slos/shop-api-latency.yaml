@@ -1,0 +1,24 @@
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: shop-api-latency
+  namespace: monitoring
+  labels:
+    service: shop-api
+spec:
+  description: Share of checkout requests completed within 300 ms.
+  target: "99"
+  window: 28d
+  alerting:
+    severities:
+      fastBurn: sev1
+      mediumBurn: sev2
+      slowBurn: sev3
+      longTermBurn: sev3
+      absent: sev2
+  indicator:
+    latency:
+      success:
+        metric: http_request_duration_seconds_bucket{job="shop-api",endpoint="/checkout",le="0.3"}
+      total:
+        metric: http_request_duration_seconds_count{job="shop-api",endpoint="/checkout"}
