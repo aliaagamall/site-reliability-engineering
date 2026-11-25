@@ -1,7 +1,7 @@
 # 02 — Observability, Dashboards, and Alerting
 
 **Area:** 4.2 — Observability, Dashboards, and Alerting  
-**Status:** Design only
+**Status:** Partly implemented. Metrics collection and burn-rate rules are verified (see `evidence/`). The dashboard, other alerts, and alert routing are design only.
 
 ## 1. Purpose
 
@@ -60,17 +60,19 @@ Alerts should represent actionable application or reliability problems.
 
 ### Burn Rate Alerts
 
-Each burn-rate alert uses a long evaluation window and a short confirmation window.
+Each burn-rate alert uses a long evaluation window and a short confirmation window. Pyrra generates these rules from the SLO definitions in `monitoring/slos/`, so they are not written by hand. The tiers, thresholds, and windows are Pyrra's defaults, verified against the generated rules in `evidence/slo-test.md`.
 
-| Alert | Burn Rate | Long Window | Short Window | Severity |
-|---|---:|---|---|---|
-| Fast burn | 14.4x | 1 hour | 5 minutes | SEV1 |
-| Slow burn | 6x | 6 hours | 30 minutes | SEV2 |
-| Budget trend | 3x | 1 day | 2 hours | SEV3 |
+| Alert tier | Burn Rate | Long Window | Short Window | For | Severity |
+|---|---:|---|---|---|---|
+| Fast burn | 14x | 1 hour | 5 minutes | 2 minutes | SEV1 |
+| Medium burn | 7x | 6 hours | 30 minutes | 15 minutes | SEV2 |
+| Slow burn | 2x | 1 day | 2 hours | 1 hour | SEV3 |
+| Long-term burn | 1x | 4 days | 6 hours | 3 hours | SEV3 |
+| Metric absent | n/a | n/a | n/a | 3 to 10 minutes | SEV2 |
 
-The same approach applies to the latency SLO.
+The same tiers apply to the availability and the latency SLO. The metric-absent alert fires when the SLO's metrics disappear, so a missing metric is not mistaken for a healthy service.
 
-Pyrra is expected to generate the related Prometheus rules. Exact generated rules must be verified during implementation.
+Pyrra labels alerts `critical` or `warning` by default. The SLO definitions set the `severity` label explicitly to `sev1`, `sev2`, or `sev3`, so alert routing uses the same names as the incident process.
 
 ### Application and Pod Alerts
 
@@ -126,7 +128,6 @@ The Alertmanager-to-GoAlert integration and SEV3 ticket destination must be test
 - Verify application metrics and PromQL queries.
 - Confirm Kubernetes metrics and labels.
 - Verify the dashboard panels and no-traffic behavior.
-- Validate Pyrra-generated alert rules.
 - Test Alertmanager-to-GoAlert routing.
 - Define the SEV3 ticket destination.
 - Test alerts using controlled traffic and failure scenarios.
